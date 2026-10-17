@@ -7,7 +7,7 @@ need to know about httpx's exception types directly — if the HTTP client
 is ever swapped out, only this file should need to change.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import httpx
 
@@ -19,6 +19,7 @@ USER_FIELDS = "username"
 EXPANSIONS = "author_id"
 PAGE_SIZE = 100
 MAX_PAGES = 32  # 32 * 100 = 3,200, matching X's own user-timeline cap
+END_TIME_MARGIN = timedelta(seconds=15)  # X: end_time must be at least 10 s before the request
 
 # X's recent/429/5xx errors are worth a retry upstream; anything else
 # (bad query, bad auth, not found) is a caller bug or a dead credential.
@@ -37,7 +38,8 @@ class TwitterApiGateway:
             timeout=15,
         )
 
-    def fetch_user_timeline(self, username: str, start: datetime, end: datetime) -> list[dict]:
+    def fetch_user_timeline(self, username: str, start: datetime, end: datetime,
+                            max_pages: int = MAX_PAGES) -> list[dict]:
         """One account's tweets in [start, end], following pagination
         (`meta.next_token`) up to X's own ~3,200-tweet user-timeline cap
         (`MAX_PAGES` pages of `PAGE_SIZE` each) — see
@@ -49,6 +51,7 @@ class TwitterApiGateway:
             self._params(start, end),
             token_param="pagination_token",
             fallback_author=username.lstrip("@"),
+            max_pages=max_pages,
         )
 
     def fetch_recent_search(
@@ -110,6 +113,11 @@ class TwitterApiGateway:
 
     @staticmethod
     def _params(start: datetime, end: datetime) -> dict:
+        # X rejects (400) an end_time later than 10 s before the request, so "now" is pulled back.
+        latest = datetime.now(timezone.utc) - END_TIME_MARGIN
+        end = min(end if end.tzinfo else end.replace(tzinfo=timezone.utc), latest)
+        start = start if start.tzinfo else start.replace(tzinfo=timezone.utc)
+        start = min(start, end - timedelta(seconds=1))
         return {
             "start_time": _iso(start),
             "end_time": _iso(end),

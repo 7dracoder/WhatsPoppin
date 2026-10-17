@@ -22,13 +22,13 @@ class FakeGateway:
         self._error = error
         self.calls = []  # (method, start, end)
 
-    def fetch_user_timeline(self, username, start, end):
+    def fetch_user_timeline(self, username, start, end, max_pages=None):
         self.calls.append(("fetch_user_timeline", start, end))
         if self._error:
             raise self._error
         return self._tweets
 
-    def fetch_recent_search(self, query, start, end):
+    def fetch_recent_search(self, query, start, end, max_pages=None):
         self.calls.append(("fetch_recent_search", start, end))
         if self._error:
             raise self._error

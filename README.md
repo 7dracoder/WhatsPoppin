@@ -262,7 +262,7 @@ Every assistant turn and market search is recorded as a **run** with timed **ste
 | `assistant.turn` | `context.snapshot` (retrieval) → `llm.complete_structured` (model) → one `action.*` per UI action |
 | `markets.search` | `embeddings.search` (retrieval) → `venue.activity_filter` (tool) |
 
-Each step records its input, output, duration and status. A failing step marks the run failed, with the error type and message, which is what failure clusters group on. Runs are appended to `.cache/prism/runs.jsonl`. With `PRISM_INGEST_URL` set, they are also posted there with `PRISM_API_KEY` on a background thread, so tracing never slows a request down.
+Each step records its input, output, duration and status. A failing step marks the run failed, with the error type and message, which is what failure clusters group on. Runs are appended to `.cache/prism/runs.jsonl`. With `PRISM_API_KEY` and `PRISM_PROJECT_ID` set, each run is also sent to PRISM on a background thread, so tracing never slows a request down: the run as a trace (`/api/traces`) and its steps as that trace's spans (`/api/spans/ingest`).
 
 **Grounding rules:** every graph link and highlight must carry a source URL from
 a real fetch in that run. Nothing is saved from model memory, and no wording
@@ -367,7 +367,7 @@ uv run python -m backend.alert_impact           # alert → affected companies
 | `NICRRON_EMBED_MODEL` | Optional: embedding model | — | `voyage/voyage-finance-2` |
 | `ELEVENLABS_API_KEY` | Voice assistant: speech-to-text + text-to-speech | [elevenlabs.io](https://elevenlabs.io) | Voice off; the typed assistant still works |
 | `ELEVENLABS_VOICE_ID` | Optional: Poppy's voice | ElevenLabs voice library | "Matilda" |
-| `PRISM_API_KEY` + `PRISM_INGEST_URL` | Optional: export run traces | PRISM | Runs are still logged locally |
+| `PRISM_API_KEY` + `PRISM_PROJECT_ID` | Optional: export run traces | [PRISM](https://prism.blockconvey.com) (API keys; Settings → Project) | Runs are still logged locally |
 
 All tuning knobs (alert thresholds, cache TTLs, daily API budgets) are
 documented in [`.env.example`](.env.example).

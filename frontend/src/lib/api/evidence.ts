@@ -143,7 +143,8 @@ export async function fetchCandidateTweets(
   const { start, end } = resolveRange(range ?? (filters ? daysRange(filters.days) : undefined));
   const account = filters?.account.trim().replace(/^@/, "");
   // Cashtag form catches "$NVDA"; the bare ticker catches plain mentions.
-  const query = filters?.query.trim() || `$${ticker} OR ${ticker}`;
+  // Original English posts only: retweets repeat the same text, and other languages can't be read here.
+  const query = filters?.query.trim() || `($${ticker} OR ${ticker}) -is:retweet lang:en`;
   const window = `start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
   try {
     return await get<ContentItem[]>(

@@ -8,10 +8,12 @@ retrieval), so a run can be opened step by step, clustered by failure and scored
         run.output = {...}
 
 Each finished run is appended to `.cache/prism/runs.jsonl` (always, for local inspection), and,
-when PRISM_INGEST_URL is set, POSTed there as JSON with `Authorization: Bearer PRISM_API_KEY`
-on a background thread, so tracing never slows or breaks the request it describes. A failed
-step marks its run failed and records the error type and message, which is what PRISM's
-Root Cause clusters group on.
+when PRISM_API_KEY and PRISM_PROJECT_ID are set, sent to PRISM on a background thread, so
+tracing never slows or breaks the request it describes: the run as one trace (`/api/traces`)
+and its steps as spans of that trace (`/api/spans/ingest`), authenticated with the
+`X-PRISMtrace-Key` header (PRISM rejects a Bearer token for API keys). A failed step marks its
+run failed and records the error type and message, which is what PRISM's Root Cause clusters
+group on.
 """
 
 from __future__ import annotations
@@ -32,6 +34,7 @@ import httpx
 log = logging.getLogger(__name__)
 
 LOCAL_LOG = Path(".cache/prism/runs.jsonl")
+DEFAULT_HOST = "https://prism.blockconvey.com"
 MAX_FIELD_CHARS = 4000
 _write_lock = threading.Lock()
 
@@ -131,15 +134,70 @@ def _write_local(record: dict) -> None:
         log.debug("PRISM local log unavailable: %s", exc)
 
 
+def _text(value: Any) -> str:
+    if value is None:
+        return ""
+    return value if isinstance(value, str) else json.dumps(value, ensure_ascii=False, default=str)
+
+
+def _to_trace(record: dict, project_id: str) -> dict:
+    """A run as one PRISM trace. A failed run carries no output, which PRISM counts as an error."""
+    inputs, output = record["input"], record["output"]
+    message = inputs.get("message") if isinstance(inputs, dict) else None
+    reply = output.get("reply") if isinstance(output, dict) else None
+    model = next((s["attributes"].get("model") for s in record["steps"] if s["attributes"].get("model")),
+                 record["attributes"].get("model") or "none")
+    return {
+        "project_id": project_id,
+        "trace_id": record["run_id"],
+        "session_id": record["run_id"],
+        "agent_id": f"{record['service']}.{record['name']}",
+        "agent_name": record["name"],
+        "model": model,
+        "input_messages": [{"role": "user", "content": _text(message or inputs)}],
+        "output_message": "" if record["status"] == "error" else _text(reply or output),
+        "latency_ms": int(record["duration_ms"]),
+        "metadata": {"service": record["service"], "status": record["status"], "error": record["error"],
+                     **record["attributes"]},
+    }
+
+
+def _to_spans(record: dict, project_id: str) -> dict:
+    """The run's steps as spans; PRISM's span types are llm, tool and agent, so retrieval is a tool."""
+    spans = []
+    for s in record["steps"]:
+        start = datetime.fromisoformat(s["started_at"].replace("Z", "+00:00"))
+        end = start.timestamp() + s["duration_ms"] / 1000
+        spans.append({
+            "span_id": s["id"],
+            "name": s["name"],
+            "span_type": "llm" if s["kind"] == "llm" else "tool",
+            "start_time": s["started_at"],
+            "end_time": datetime.fromtimestamp(end, timezone.utc).isoformat().replace("+00:00", "Z"),
+            "duration_ms": s["duration_ms"],
+            "status": s["status"],
+            "error_message": s["error"]["message"] if s["error"] else None,
+            "input_text": _text(s["input"]),
+            "output_text": _text(s["output"]),
+            "model": s["attributes"].get("model"),
+        })
+    return {"trace_id": record["run_id"], "project_id": project_id, "session_id": record["run_id"],
+            "spans": spans}
+
+
 def _export(record: dict) -> None:
-    url = os.environ.get("PRISM_INGEST_URL")
     key = os.environ.get("PRISM_API_KEY")
-    if not (url and key):
+    project_id = os.environ.get("PRISM_PROJECT_ID")
+    if not (key and project_id):
         return
+    host = os.environ.get("PRISM_HOST", DEFAULT_HOST).rstrip("/")
 
     def send() -> None:
         try:
-            httpx.post(url, json=record, headers={"Authorization": f"Bearer {key}"}, timeout=10).raise_for_status()
+            with httpx.Client(base_url=host, headers={"X-PRISMtrace-Key": key}, timeout=10) as client:
+                client.post("/api/traces", json=_to_trace(record, project_id)).raise_for_status()
+                if record["steps"]:
+                    client.post("/api/spans/ingest", json=_to_spans(record, project_id)).raise_for_status()
         except httpx.HTTPError as exc:
             log.warning("PRISM export failed for run %s: %s", record["run_id"], exc)
 

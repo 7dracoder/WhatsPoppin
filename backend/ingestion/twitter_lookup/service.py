@@ -21,6 +21,7 @@ def lookup_account(
     end: datetime,
     gateway: TwitterApiGateway,
     entities: list[EntityAlias],
+    max_pages: int | None = None,
 ) -> list[ContentItem]:
     """On-demand backfill of one account's tweets in [start, end].
 
@@ -29,7 +30,8 @@ def lookup_account(
     engagement counts — all out of scope for this layer (see
     new_specs/ingestion/twitter-lookup.md Non-Goals).
     """
-    raw_tweets = gateway.fetch_user_timeline(username, start, end)
+    raw_tweets = (gateway.fetch_user_timeline(username, start, end) if max_pages is None
+                  else gateway.fetch_user_timeline(username, start, end, max_pages=max_pages))
     return _tag_entities(normalize_batch(raw_tweets), entities)
 
 
@@ -39,6 +41,7 @@ def lookup_keyword(
     end: datetime,
     gateway: TwitterApiGateway,
     entities: list[EntityAlias],
+    max_pages: int | None = None,
 ) -> list[ContentItem]:
     """On-demand keyword/topic search in [start, end] — e.g. triggered by
     alert_detector's enricher around a price-move alert. `query` is
@@ -48,7 +51,8 @@ def lookup_keyword(
     Does not: build the query itself, retry on TwitterApiError, classify
     the tweets — all out of scope for this layer.
     """
-    raw_tweets = gateway.fetch_recent_search(query, start, end)
+    raw_tweets = (gateway.fetch_recent_search(query, start, end) if max_pages is None
+                  else gateway.fetch_recent_search(query, start, end, max_pages=max_pages))
     return _tag_entities(normalize_batch(raw_tweets), entities)
 
 

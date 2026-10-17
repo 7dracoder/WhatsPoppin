@@ -146,3 +146,24 @@ def test_fetch_recent_search_follows_pagination():
 
     assert [t["id"] for t in tweets] == ["1111111111", "2222222222"]
     assert fake.calls[1][1]["next_token"] == "page2token"
+
+
+def test_end_time_is_kept_at_least_ten_seconds_in_the_past():
+    """X 400s an end_time within 10 s of the request, which "now" always is."""
+    from datetime import timedelta
+
+    fake = FakeHttpxClient({"/tweets/search/recent": FakeResponse(200, {"data": []})})
+    gateway = TwitterApiGateway(bearer_token="dummy", http_client=fake)
+    now = datetime.now(timezone.utc)
+    gateway.fetch_recent_search("#nvidia", now - timedelta(days=2), now)
+    sent = datetime.strptime(fake.calls[0][1]["end_time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    assert sent <= now - timedelta(seconds=10)
+
+
+def test_max_pages_limits_pagination():
+    page = _load("sample_tweets_response.json")
+    page = {**page, "meta": {"next_token": "more"}}
+    fake = FakeHttpxClient({"/tweets/search/recent": FakeResponse(200, page)})
+    gateway = TwitterApiGateway(bearer_token="dummy", http_client=fake)
+    gateway.fetch_recent_search("#nvidia", START, END, max_pages=1)
+    assert len(fake.calls) == 1

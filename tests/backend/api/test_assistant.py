@@ -11,7 +11,7 @@ from backend.observability import prism
 @pytest.fixture(autouse=True)
 def local_trace(tmp_path, monkeypatch):
     monkeypatch.setattr(prism, "LOCAL_LOG", tmp_path / "runs.jsonl")
-    monkeypatch.delenv("PRISM_INGEST_URL", raising=False)
+    monkeypatch.delenv("PRISM_PROJECT_ID", raising=False)
     return tmp_path / "runs.jsonl"
 
 
@@ -77,3 +77,4 @@ def test_speak_proxies_elevenlabs_without_exposing_the_key(monkeypatch):
     assert r.status_code == 200 and r.content == b"ID3mp3bytes" and r.headers["content-type"] == "audio/mpeg"
     assert seen["key"] == "secret-key" and "/text-to-speech/" in seen["url"]
     assert "secret-key" not in r.text
+

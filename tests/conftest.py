@@ -11,3 +11,4 @@ _GATEWAY_SETTINGS = ("NICRRON_API_KEY", "NICRRON_MODEL", "NICRRON_JEV_MODEL", "L
 def no_real_gateway(monkeypatch):
     for name in _GATEWAY_SETTINGS:
         monkeypatch.delenv(name, raising=False)
+    monkeypatch.delenv("PRISM_PROJECT_ID", raising=False)  # traced endpoints would export to real PRISM

@@ -23,6 +23,10 @@ from backend.llm import LlmError, complete_structured
 router = APIRouter(prefix="/twitter", tags=["twitter"])
 
 DEFAULT_LOOKBACK = timedelta(days=5)
+# The evidence picker shows a few dozen posts, and X bills per post read: one page (100 posts) per
+# search and two per account lookup is plenty. /classify keeps the full history caps below.
+UI_SEARCH_PAGES = 1
+UI_ACCOUNT_PAGES = 2
 
 # /classify: fetch as much history as twitter-lookup's own caps allow
 # (see new_specs/twitter-jev-classification.md Functional Requirement 2) —
@@ -80,7 +84,7 @@ def get_account_tweets(
 ) -> list[ContentItem]:
     start, end = _default_range(start, end)
     try:
-        return lookup_account(handle, start, end, gateway, entities=[])
+        return lookup_account(handle, start, end, gateway, entities=[], max_pages=UI_ACCOUNT_PAGES)
     except TwitterApiError as exc:
         raise HTTPException(status_code=502 if exc.retryable else 400, detail=exc.message) from exc
 
@@ -95,7 +99,7 @@ def search_tweets(
     start, end = _default_range(start, end)
     start = _clamp_search_start(start, end)
     try:
-        return lookup_keyword(query, start, end, gateway, entities=[])
+        return lookup_keyword(query, start, end, gateway, entities=[], max_pages=UI_SEARCH_PAGES)
     except TwitterApiError as exc:
         raise HTTPException(status_code=502 if exc.retryable else 400, detail=exc.message) from exc
 
