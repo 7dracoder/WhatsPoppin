@@ -1,5 +1,5 @@
 """Fetch a real account's tweets via ingestion/twitter_lookup and run the
-classification/ library (Jev, via OpenRouter) against every one, to see
+classification/ library (Jev questions, via the Nicrron gateway) against every one, to see
 real latency numbers and a human-reviewable transcript — not a synthetic
 smoke test. Mirrors scripts/bench_jev_news.py's pattern for the Twitter
 side (see new_specs/twitter-jev-classification.md Functional Requirement 8).
@@ -16,7 +16,7 @@ scripts/output/twitter_jev_test.json) for review.
 
 Usage:
     python scripts/bench_jev_twitter.py --handle realDonaldTrump --entity NVDA [--tags oil,shipping] [--count N] [--concurrency N] [--threshold F] [--out PATH]
-    # needs OPENROUTER (for Jev + the Haiku category fallback) and X_BEARER_TOKEN set (env or .env)
+    # needs NICRRON_API_KEY (for Jev + the category fallback) and X_BEARER_TOKEN set (env or .env)
 """
 
 import argparse
@@ -85,7 +85,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    require_env("OPENROUTER")
+    require_env("NICRRON_API_KEY")
     bearer_token = require_env("X_BEARER_TOKEN")
 
     gateway = TwitterApiGateway(bearer_token=bearer_token)

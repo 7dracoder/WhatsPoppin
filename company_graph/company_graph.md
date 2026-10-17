@@ -32,7 +32,7 @@ Not built yet: demo commands (F11).
 - **SEC client (F2):** each `SecClient` has its own rate limiter, so one link run must share one client.
 - **News cache (F6):** results per company, the daily request budget and Jev labels live in `.cache/company_graph/news_cache.json`. Deleting it only costs a few repeated requests. The budget lock covers one process.
 - **Market names (F7):** a market names a company only through its full name or a cashtag (`$TSLA`); bare tickers and common words never match. Short names for Palantir, Uber, Disney, Ford and Delta come from the built-in seed aliases in `backend/entities/data/sp500_top50.json`.
-- **Model provider (F4, F8):** `llm.complete` uses the shared OpenRouter client by default, or the Anthropic SDK directly with `GRAPH_LLM_PROVIDER=anthropic` (structured outputs, low effort, server-side fallbacks on models that support them). Every failure is an `LlmError` either way. The team's OpenRouter default model is `anthropic/claude-haiku-5.5`; `GRAPH_LLM_MODEL` overrides it.
+- **Model provider (F4, F8):** `llm.complete` uses the shared Nicrron client by default, or the Anthropic SDK directly with `GRAPH_LLM_PROVIDER=anthropic` (structured outputs, low effort, server-side fallbacks on models that support them). Every failure is an `LlmError` either way. The team's Nicrron default model is `anthropic/claude-haiku-5.5`; `GRAPH_LLM_MODEL` overrides it.
 - **X posts (F12, `social_events.py`):** one X recent search per batch of companies (one page, relevancy order, no retweets or replies), cached in `.cache/company_graph/social_cache.json` with its own daily budget. Stock lists and posts under `GRAPH_SOCIAL_MIN_LIKES` likes are dropped. Jev is asked once per (post, company it names) whether the post states an event about that company as fact; anything else, or a probability under 0.9, is ignored. Kept posts are saved as `graph_events` with source `social`, and the highlight builder treats them like news. Without `X_BEARER_TOKEN` the step is left out.
 - **Pair news (F13, `pair_news.py`):** `GET /graph/{ticker}/news/{other}` searches NewsAPI (`"A" AND "B"`, 30 days) and X (both names, 7 days) once per pair, keeps what Jev says is about the two together (title plus the article's opening text), and caches it per pair in `.cache/company_graph/pair_cache.json`. It answers only for companies linked in the stored graph. The page shows it on a linked company's panel.
 - **Sync calls:** `llm.complete`, `extract.extract` and Jev are synchronous. Call them through `asyncio.to_thread`.
@@ -46,7 +46,7 @@ Not built yet: demo commands (F11).
 - **What counts as a relationship (F4):** the prompt excludes landlords and leases, lenders, insurers, auditors, law firms, shareholders, lawsuit opponents, ended relationships and anything hypothetical.
 - **SEC retries (F2):** 429, 500, 502, 503 and 504 are retried with backoff.
 - **Processed filings (F5):** own filings are keyed by accession number; reverse reads by `accession#SYMBOL`, so one big 10-K can serve several companies' graphs.
-- **Event typing provider (F6):** with `GRAPH_LLM_PROVIDER=anthropic`, `classify_event` asks Claude through `llm.complete` (the same five event types plus `none`, as `EventLabel`) and needs no `OPENROUTER` key; otherwise it uses Jev as before. Labels are cached per URL in the news cache either way.
+- **Event typing provider (F6):** with `GRAPH_LLM_PROVIDER=anthropic`, `classify_event` asks Claude through `llm.complete` (the same five event types plus `none`, as `EventLabel`) and needs no `NICRRON_API_KEY` key; otherwise it uses Jev as before. Labels are cached per URL in the news cache either way.
 - **Which companies an event can reach (F8):** one hop along the searched company S's links. An event about S is offered to the model with all of S's linked companies; an event about a linked company L is offered with S only (target S, so it shows wherever S is a node, such as L's graph, not on S's own page). Only companies the model names from that list get a highlight.
 - **Highlight direction (F8):** from the target's role on the link, never from the model: supplier, customer, partner -> `may_benefit`; competitor -> `may_face_pressure`; `sector_peer` -> `may_face_pressure` only when the model marks the event a direct competitive gain over that peer (`competitive_gain`), otherwise no highlight. Industry peers have no stated relationship, so only a clear win gives a defensible direction.
 - **Highlight wording (F8):** one factual sentence per highlight; reasons that read like a price prediction or trade suggestion are dropped (`highlights.is_factual`). `price_change_pct` is the past change from the last bar at or before the event to the latest bar, null when the Alpaca keys are missing, the call fails, or the company has no US ticker.
@@ -67,8 +67,8 @@ Add to `.env` (see `.env.example` for the shared keys and the company graph bloc
 ```
 DATABASE_URL=postgresql://...        # the shared database
 SEC_CONTACT_EMAIL=you@example.com    # SEC rejects requests without a contact
-OPENROUTER=...                       # model calls through backend/llm and Jev (F6)
-GRAPH_LLM_PROVIDER=anthropic         # optional: F4/F8 call Claude directly instead of via OpenRouter
+NICRRON_API_KEY=...                       # model calls through backend/llm and Jev (F6)
+GRAPH_LLM_PROVIDER=anthropic         # optional: F4/F8 call Claude directly instead of via the Nicrron gateway
 ANTHROPIC_API_KEY=sk-ant-...         # needed when GRAPH_LLM_PROVIDER=anthropic
 # GRAPH_ANTHROPIC_MODEL=claude-haiku-5-5   # optional: cheaper than the default claude-opus-5-5
 NEWSAPI_KEY=...                      # news events (F6); without it highlights use market alerts only
@@ -144,5 +144,5 @@ uv run pytest tests/company_graph
 
 No test needs a network connection or a running Postgres: table tests use SQLite and also
 compile the Postgres DDL. `tests/company_graph/conftest.py` clears the model settings and the
-`NEWSAPI_KEY`, `ALPACA_*`, `OPENROUTER` and `ANTHROPIC_API_KEY` keys for every test, and makes
-any real Anthropic, OpenRouter or Jev call fail.
+`NEWSAPI_KEY`, `ALPACA_*`, `NICRRON_API_KEY` and `ANTHROPIC_API_KEY` keys for every test, and makes
+any real Anthropic, Nicrron or Jev call fail.

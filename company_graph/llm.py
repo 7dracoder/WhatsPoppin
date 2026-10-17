@@ -1,9 +1,8 @@
 """The one place this feature calls a free-form model (F4 extractor, F8 highlight builder).
 
 Two providers, picked by GRAPH_LLM_PROVIDER:
-- "openrouter" (default): the shared backend.llm.client.complete_structured, with the model
-  from GRAPH_LLM_MODEL. That client goes through the Nicrron gateway when NICRRON_API_KEY is
-  set, otherwise OpenRouter (OPENROUTER key).
+- "nicrron" (default): the shared backend.llm.client.complete_structured (the Nicrron gateway,
+  NICRRON_API_KEY), with the model from GRAPH_LLM_MODEL.
 - "anthropic": the Anthropic API directly through the official SDK, with the model from
   GRAPH_ANTHROPIC_MODEL. Uses ANTHROPIC_API_KEY. The reply is parsed into the Pydantic model
   with structured outputs, so it is always schema-valid JSON.

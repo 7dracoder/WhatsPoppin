@@ -150,7 +150,7 @@ API (draft, in `backend/api/alerts.py`):
 ## Dependencies
 
 - Alert detector running (and its baselines), writing `alerts`.
-- Enrichment code and tables ([market-search.md](./market-search.md)), Jev via OpenRouter
+- Enrichment code and tables ([market-search.md](./market-search.md)), Jev via the Nicrron gateway
   with credits.
 - Company graph: `entity_relationships`, `graph_events` (F7), highlights (F8).
 - Company graph F14 (`company_graph/tags.py`, `entity_relationships.tags`) and the

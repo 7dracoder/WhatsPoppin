@@ -16,19 +16,19 @@ def _client_with(handler) -> httpx.Client:
     return httpx.Client(transport=httpx.MockTransport(handler))
 
 
-def _openrouter_response(content: str) -> httpx.Response:
+def _chat_response(content: str) -> httpx.Response:
     return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
 
 
 @pytest.fixture(autouse=True)
 def api_key(monkeypatch):
-    monkeypatch.setenv("OPENROUTER", "test-key")
+    monkeypatch.setenv("NICRRON_API_KEY", "test-key")
 
 
 def test_complete_structured_parses_valid_json():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.headers["Authorization"] == "Bearer test-key"
-        return _openrouter_response(json.dumps({"name": "nvidia", "count": 3}))
+        return _chat_response(json.dumps({"name": "nvidia", "count": 3}))
 
     result = complete_structured(
         "system prompt", "user query", _Thing, http_client=_client_with(handler)
@@ -38,14 +38,14 @@ def test_complete_structured_parses_valid_json():
 
 
 def test_complete_structured_raises_on_missing_api_key(monkeypatch):
-    monkeypatch.delenv("OPENROUTER", raising=False)
-    with pytest.raises(LlmError, match="OPENROUTER"):
+    monkeypatch.delenv("NICRRON_API_KEY", raising=False)
+    with pytest.raises(LlmError, match="NICRRON_API_KEY"):
         complete_structured("system", "query", _Thing)
 
 
 def test_complete_structured_raises_on_invalid_json_output():
     def handler(request: httpx.Request) -> httpx.Response:
-        return _openrouter_response("not valid json for this schema")
+        return _chat_response("not valid json for this schema")
 
     with pytest.raises(LlmError, match="didn't match"):
         complete_structured("system", "query", _Thing, http_client=_client_with(handler))
@@ -53,7 +53,7 @@ def test_complete_structured_raises_on_invalid_json_output():
 
 def test_complete_structured_raises_on_missing_required_field():
     def handler(request: httpx.Request) -> httpx.Response:
-        return _openrouter_response(json.dumps({"count": 3}))  # missing required "name"
+        return _chat_response(json.dumps({"count": 3}))  # missing required "name"
 
     with pytest.raises(LlmError, match="didn't match"):
         complete_structured("system", "query", _Thing, http_client=_client_with(handler))
@@ -78,7 +78,6 @@ def test_complete_structured_raises_on_unexpected_response_shape():
 def test_gemini_provider_uses_googles_endpoint_and_key(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "gemini")
     monkeypatch.setenv("GEMINI_API_KEY", "g-key")
-    monkeypatch.delenv("OPENROUTER", raising=False)
     seen = {}
 
     def handler(request):
@@ -90,7 +89,7 @@ def test_gemini_provider_uses_googles_endpoint_and_key(monkeypatch):
                         http_client=httpx.Client(transport=httpx.MockTransport(handler)))
     assert seen["url"].startswith("https://generativelanguage.googleapis.com/")
     assert seen["auth"] == "Bearer g-key"
-    assert seen["model"] == "gemini-2.5-flash"  # an OpenRouter model name is replaced, not sent to Google
+    assert seen["model"] == "gemini-2.5-flash"  # a gateway model name is replaced, not sent to Google
 
 
 def test_gemini_provider_without_key_is_a_clear_error(monkeypatch):
@@ -100,19 +99,30 @@ def test_gemini_provider_without_key_is_a_clear_error(monkeypatch):
         complete_structured("s", "u", _Thing)
 
 
-def test_nicrron_is_the_default_when_its_key_is_set(monkeypatch):
+def test_nicrron_is_the_default_provider(monkeypatch):
     monkeypatch.setenv("NICRRON_API_KEY", "n-key")
     seen = {}
 
     def handler(request):
         seen["url"], seen["auth"] = str(request.url), request.headers["Authorization"]
         seen["model"] = json.loads(request.content)["model"]
-        return _openrouter_response(json.dumps({"name": "x"}))
+        return _chat_response(json.dumps({"name": "x"}))
 
-    complete_structured("s", "u", _Thing, http_client=_client_with(handler))
+    complete_structured("s", "u", _Thing, model="anthropic/claude-haiku-5.5", http_client=_client_with(handler))
     assert seen["url"] == "https://api.nicrron.ai/v1/chat/completions"
     assert seen["auth"] == "Bearer n-key"
-    assert seen["model"] == "anthropic/claude-haiku-5-5"  # OpenRouter-style dots rewritten for Nicrron
+    assert seen["model"] == "anthropic/claude-haiku-5-5"  # dotted versions rewritten for Nicrron
+
+
+def test_default_model_is_nicrron_auto():
+    seen = {}
+
+    def handler(request):
+        seen["model"] = json.loads(request.content)["model"]
+        return _chat_response(json.dumps({"name": "x"}))
+
+    complete_structured("s", "u", _Thing, http_client=_client_with(handler))
+    assert seen["model"] == "nicrron/auto"
 
 
 def test_nicrron_model_setting_overrides_the_callers_model(monkeypatch):
@@ -122,7 +132,7 @@ def test_nicrron_model_setting_overrides_the_callers_model(monkeypatch):
 
     def handler(request):
         seen["model"] = json.loads(request.content)["model"]
-        return _openrouter_response(json.dumps({"name": "x"}))
+        return _chat_response(json.dumps({"name": "x"}))
 
     complete_structured("s", "u", _Thing, model="anthropic/claude-haiku-5.5", http_client=_client_with(handler))
     assert seen["model"] == "nicrron/auto"
@@ -130,6 +140,6 @@ def test_nicrron_model_setting_overrides_the_callers_model(monkeypatch):
 
 def test_fenced_json_is_accepted():
     def handler(request):
-        return _openrouter_response('```json\n{"name": "nvidia", "count": 2}\n```')
+        return _chat_response('```json\n{"name": "nvidia", "count": 2}\n```')
 
     assert complete_structured("s", "u", _Thing, http_client=_client_with(handler)) == _Thing(name="nvidia", count=2)

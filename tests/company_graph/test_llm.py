@@ -71,17 +71,17 @@ def test_api_errors_become_llm_error(monkeypatch):
         llm.complete("s", "u", Reply)
 
 
-def test_openrouter_is_still_the_default(monkeypatch):
+def test_nicrron_is_the_default(monkeypatch):
     monkeypatch.delenv("GRAPH_LLM_PROVIDER", raising=False)
     seen = {}
 
     def fake(system, user, response_model, model):
         seen["model"] = model
-        return response_model(answer="via openrouter")
+        return response_model(answer="via nicrron")
 
     monkeypatch.setattr(llm._client, "complete_structured", fake)
     monkeypatch.setattr(llm, "_get_anthropic_client", lambda: pytest.fail("Anthropic must not be called"))
-    assert llm.complete("s", "u", Reply).answer == "via openrouter"
+    assert llm.complete("s", "u", Reply).answer == "via nicrron"
 
 
 def test_unknown_provider_stops_with_a_clear_message(monkeypatch):

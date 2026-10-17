@@ -4,14 +4,13 @@ docs.typesafe.ai/introduction. This file is the one place that knows how
 to speak that contract; modes.py stays in terms of JevQuestion/JevAnswer
 only.
 
-Provider choice, first match wins:
-1. TYPESAFE_API_KEY: TypeSafe's Jev directly (api.typesafe.ai).
-2. NICRRON_API_KEY: the Nicrron gateway. Nicrron serves chat models, not
-   Jev, so the same questions are put to a chat model (NICRRON_JEV_MODEL,
+Provider choice:
+1. TYPESAFE_API_KEY (optional): TypeSafe's native Jev model (api.typesafe.ai).
+2. NICRRON_API_KEY (default): the Nicrron gateway. Nicrron serves chat models,
+   not Jev, so the same questions are put to a chat model (NICRRON_JEV_MODEL,
    else NICRRON_MODEL, else nicrron/auto) that answers with probabilities,
    and the reply is normalized into exactly the answer shapes Jev returns.
-3. OPENROUTER: Jev through OpenRouter's decisions proxy ("typesafe/jev-1.13").
-Every path returns the same {question_id: JevAnswer} map.
+Both return the same {question_id: JevAnswer} map.
 """
 
 import json
@@ -20,15 +19,12 @@ import os
 import httpx
 from pydantic import ValidationError
 
-from backend.llm.client import NICRRON_DEFAULT_MODEL, NICRRON_URL, strip_json_fences
+from backend.llm.client import NICRRON_DEFAULT_MODEL, NICRRON_URL, post_with_retry, strip_json_fences
 
 from .primitives import ANSWER_TYPES, ChoiceQuestion, JevAnswer, JevQuestion, NoulQuestion, ScoreQuestion
 
 TYPESAFE_URL = "https://api.typesafe.ai/v1/systemone"
 TYPESAFE_DEFAULT_MODEL = "jev-latest"
-OPENROUTER_URL = "https://openrouter.ai/api/alpha/decisions"
-OPENROUTER_DEFAULT_MODEL = "typesafe/jev-1.13"
-DEFAULT_MODEL = OPENROUTER_DEFAULT_MODEL  # back-compat for any caller importing this directly
 
 NICRRON_JEV_SYSTEM = """You are a calibrated text classifier. You get a STATE (the text to judge) and
 QUESTIONS, each with an id and a type. Answer every question about the STATE only, with honest
@@ -62,17 +58,13 @@ def call_jev(
     defaults to a real httpx.Client otherwise.
     """
     typesafe_key = os.environ.get("TYPESAFE_API_KEY")
-    nicrron_key = os.environ.get("NICRRON_API_KEY")
-    if typesafe_key:
-        url, api_key, model = TYPESAFE_URL, typesafe_key, model or TYPESAFE_DEFAULT_MODEL
-    elif nicrron_key:
+    if not typesafe_key:
+        nicrron_key = os.environ.get("NICRRON_API_KEY")
+        if not nicrron_key:
+            raise JevError("NICRRON_API_KEY is not set in environment (or TYPESAFE_API_KEY for native Jev)")
         return _call_via_nicrron(state, questions, nicrron_key, http_client)
-    else:
-        api_key = os.environ.get("OPENROUTER")
-        if not api_key:
-            raise JevError("None of TYPESAFE_API_KEY, NICRRON_API_KEY or OPENROUTER is set in environment")
-        url, model = OPENROUTER_URL, model or OPENROUTER_DEFAULT_MODEL
 
+    url, api_key, model = TYPESAFE_URL, typesafe_key, model or TYPESAFE_DEFAULT_MODEL
     body = {
         "model": model,
         "state": state,
@@ -89,7 +81,8 @@ def call_jev(
 def _post(url: str, api_key: str, body: dict, http_client: httpx.Client | None, timeout: float = 20) -> httpx.Response:
     client = http_client or httpx.Client()
     try:
-        response = client.post(url, headers={"Authorization": f"Bearer {api_key}"}, json=body, timeout=timeout)
+        response = post_with_retry(client, url, headers={"Authorization": f"Bearer {api_key}"}, json=body,
+                                   timeout=timeout)
         response.raise_for_status()
     except httpx.HTTPError as exc:
         raise JevError(f"Jev request failed: {exc}") from exc

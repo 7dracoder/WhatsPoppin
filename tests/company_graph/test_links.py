@@ -501,12 +501,12 @@ def test_own_subjects_ranks_by_mentions_and_excludes_self():
 
 # --- live check (opt-in, never runs in CI) -----------------------------------------------------
 
-LIVE = all(os.environ.get(k) for k in ("SEC_CONTACT_EMAIL", "OPENROUTER", "DATABASE_URL")) and \
+LIVE = all(os.environ.get(k) for k in ("SEC_CONTACT_EMAIL", "NICRRON_API_KEY", "DATABASE_URL")) and \
     os.environ.get("GRAPH_LIVE_EVAL") == "1"
 
 
 @pytest.mark.skipif(not LIVE, reason="live SEC + model + database check; set GRAPH_LIVE_EVAL=1, "
-                                     "SEC_CONTACT_EMAIL, OPENROUTER and DATABASE_URL to run it")
+                                     "SEC_CONTACT_EMAIL, NICRRON_API_KEY and DATABASE_URL to run it")
 def test_live_large_company_gets_three_links():  # pragma: no cover - calls SEC, the model and the database
     from sqlalchemy.ext.asyncio import AsyncSession
 

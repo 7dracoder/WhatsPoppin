@@ -17,7 +17,7 @@ Synchronous, like classify(); the worker runs it through asyncio.to_thread.
 """
 
 from backend.classification import MultiSelectSpec, classify
-from backend.entities import CATEGORIES, EntityMap
+from backend.entities import CATEGORIES, EntityMap, MapEntity
 
 ENTITY_QUESTION = "Is this prediction market about {label}, or would its outcome directly affect {label}?"
 # A market about a city, state or region is about its country too (NYC weather -> United States).
@@ -49,6 +49,34 @@ def event_text(markets: list[dict]) -> tuple[str, str | None]:
     ]
     text = "\n".join(f"{name}: {value}" for name, value in lines if value and value != title)
     return title, text or None
+
+
+# One question for a mixed shortlist (companies, places, sectors…), so it carries the place rule too.
+SHORTLIST_QUESTION = ("Is this prediction market about {label} (for a country: or a place in it, such as a city, "
+                      "state or region), or would its outcome directly affect {label}?")
+
+
+def enrich_event_shortlist(markets: list[dict], shortlist, k: int = 12, threshold: float = 0.5,
+                           category_threshold: float = 0.3, classify_fn=classify) -> list[str]:
+    """Two Jev calls in total, whatever the number of categories (enrich_event makes 1 + one per category).
+
+    Pass 1 is the same category question. Then `shortlist(categories, k)` (vectors.EntityIndex,
+    bound to this event's embedding) retrieves the k closest entities in each chosen category, and
+    pass 2 asks Jev about all of them in ONE call. Jev still checks each candidate at `threshold`,
+    so retrieval only decides what is asked, never what is tagged.
+    """
+    title, text = event_text(markets)
+    categories = classify_fn(title, text, MultiSelectSpec(labels=CATEGORIES, threshold=category_threshold)).label
+    candidates = shortlist(list(categories), k) if categories else []
+    if not candidates:
+        return []
+    by_name = {e.name: e for e in candidates}
+    spec = MultiSelectSpec(
+        labels={e.name: (f"also known as {', '.join(e.aliases)}" if e.aliases else None) for e in candidates},
+        threshold=threshold,
+        question=SHORTLIST_QUESTION,
+    )
+    return [by_name[name].symbol for name in classify_fn(title, text, spec).label if name in by_name]
 
 
 def enrich_event(markets: list[dict], entity_map: EntityMap, threshold: float = 0.5,

@@ -20,8 +20,8 @@ class Config:
     graph_board_ttl_days: float = 7      # how long a stored board is reused before a rebuild
     graph_board_max_filings: int = 40    # most Form 3 / 4 filings read per board run (newest first)
     graph_fake: int = 0                  # 1 = serve fixtures, call nothing outside
-    graph_llm_provider: str = "openrouter"  # "openrouter" (the shared client: Nicrron or OpenRouter) or "anthropic" (ANTHROPIC_API_KEY)
-    graph_llm_model: str = DEFAULT_MODEL  # OpenRouter model id; the project default lives in backend/llm/client.py
+    graph_llm_provider: str = "nicrron"  # "nicrron" (the shared backend.llm client) or "anthropic" (ANTHROPIC_API_KEY)
+    graph_llm_model: str = DEFAULT_MODEL  # Nicrron model id; the project default lives in backend/llm/client.py
     graph_anthropic_model: str = "claude-opus-5-5"  # Claude model id when GRAPH_LLM_PROVIDER=anthropic
     sec_contact_email: str = ""          # sent in the SEC User-Agent; required for any SEC call
     newsapi_key: str = ""
@@ -71,8 +71,8 @@ def load() -> Config:
     cfg = Config(**values)
     if cfg.graph_fake not in (0, 1):
         raise SystemExit(f"GRAPH_FAKE must be 0 or 1, got {cfg.graph_fake}")
-    if cfg.graph_llm_provider not in ("openrouter", "anthropic"):
-        raise SystemExit(f"GRAPH_LLM_PROVIDER must be openrouter or anthropic, got {cfg.graph_llm_provider!r}")
+    if cfg.graph_llm_provider not in ("nicrron", "anthropic"):
+        raise SystemExit(f"GRAPH_LLM_PROVIDER must be nicrron or anthropic, got {cfg.graph_llm_provider!r}")
     if cfg.graph_max_linked < 1:
         raise SystemExit(f"GRAPH_MAX_LINKED must be at least 1, got {cfg.graph_max_linked}")
     if cfg.graph_board_max_filings < 1:

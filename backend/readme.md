@@ -48,7 +48,7 @@ GET /twitter/classify?entity=...&handle=...|query=...&tags=...
 `/twitter/search` default to the last 5 days if omitted. `/twitter/classify`
 fetches as much history as `ingestion/twitter_lookup` allows and runs
 every post through `backend/classification`/`backend/llm` — see
-`new_specs/twitter-jev-classification.md`. Needs `OPENROUTER` set too.
+`new_specs/twitter-jev-classification.md`. Needs `NICRRON_API_KEY` set too.
 
 ## Verify
 

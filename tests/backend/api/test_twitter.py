@@ -148,7 +148,7 @@ def test_classify_falls_back_to_generic_categories_when_llm_unreachable(monkeypa
     monkeypatch.setattr(twitter_router, "classify", _fake_classify)
 
     def _raise_llm_error(**kwargs):
-        raise LlmError("OPENROUTER not set")
+        raise LlmError("NICRRON_API_KEY is not set")
 
     monkeypatch.setattr(twitter_router, "complete_structured", _raise_llm_error)
     app.dependency_overrides[get_twitter_gateway] = lambda: FakeGateway(tweets=[BULLISH_TWEET])

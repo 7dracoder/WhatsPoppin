@@ -122,7 +122,7 @@ API endpoints (`uv run uvicorn backend.main:app`, port 8000):
 
 - Existing pollers and the `markets` table (Kalshi, Polymarket,
   Polymarket US).
-- Jev API via `backend/classification` (OpenRouter).
+- Jev API via `backend/classification` (Nicrron).
 - Postgres.
 
 ## Open Questions

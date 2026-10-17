@@ -1,4 +1,4 @@
-"""Wire-level types for Jev's (typesafe/jev-1.13, via OpenRouter) three
+"""Wire-level types for the Jev question contract's three
 question primitives: Noul (yes/no -> probability), Choice (one label from
 a set -> label + per-label probabilities), Score (ordered rubric ->
 weighted position). 1:1 with the documented request/response contract —

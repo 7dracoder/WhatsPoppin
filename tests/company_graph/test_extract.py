@@ -120,8 +120,8 @@ def test_ten_chunk_accuracy_with_faked_model():
     assert _score(results) >= 9
 
 
-@pytest.mark.skipif(not (os.environ.get("GRAPH_LIVE_EVAL") == "1" and os.environ.get("OPENROUTER")),
-                    reason="live model check; set GRAPH_LIVE_EVAL=1 and OPENROUTER to run it")
+@pytest.mark.skipif(not (os.environ.get("GRAPH_LIVE_EVAL") == "1" and os.environ.get("NICRRON_API_KEY")),
+                    reason="live model check; set GRAPH_LIVE_EVAL=1 and NICRRON_API_KEY to run it")
 def test_live_accuracy():  # pragma: no cover - calls the real model
     results = [(extract(passage, filer, subject), expected) for filer, subject, passage, expected, _ in CASES]
     assert _score(results) >= 9

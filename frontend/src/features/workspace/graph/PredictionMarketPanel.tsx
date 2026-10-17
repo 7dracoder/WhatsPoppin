@@ -142,7 +142,8 @@ function MarketCard({
             style={{ color: "var(--text-tertiary)" }}
           >
             <span style={{ color: "var(--accent)" }}>
-              {Math.round(match.matchScore * 100)}% match
+              {/* Cosine similarity, not a probability: 0.35+ is a strong match for this model. */}
+              similarity {match.matchScore.toFixed(2)}
             </span>
             {" · "}
             {match.matchReason}

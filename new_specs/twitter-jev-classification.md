@@ -131,7 +131,7 @@ behind one API call that returns the result directly — no storage.
       not reasoning," per that module's own docstring) with a small
       response model (e.g. `IndirectRelevanceCategories(categories:
       list[str])`) produces 3-6 short phrases for the given entity.
-      "Reachable" means: `OPENROUTER` is set and the call doesn't raise
+      "Reachable" means: `NICRRON_API_KEY` is set and the call doesn't raise
       `LlmError` — checked once per entity per request, not assumed.
    3. **A generic static default**, if neither of the above is
       available (no caller-supplied `tags`, no reachable LLM) — one fixed list broad

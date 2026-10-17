@@ -31,7 +31,7 @@ risks that hit stocks. But using it today means:
 | | |
 |---|---|
 | **Company graph** | Search any listed company. Its suppliers, customers, partners, competitors and board interlocks are extracted from SEC 10-K/10-Q and insider filings, each link with the filing it came from. |
-| **Markets that matter** | Every open Kalshi and Polymarket market is tagged by an LLM with the companies, sectors and themes it affects. A company gets its own markets first, then its linked companies' markets, then markets matching its themes. Or describe a risk in plain English ("chip export controls china") and get matching markets. |
+| **Markets that matter** | Every open Kalshi and Polymarket market is tagged with the companies, sectors and themes it affects. A company gets its own markets first, then its linked companies' markets, then markets matching its themes. Or describe a risk in plain English ("war in the middle east oil supply") and semantic search finds the matching markets. |
 | **Price vs. odds** | The stock and the market's odds on one timeline (1D to all-time), market-adjusted against SPY, with a correlation and lead/lag readout. |
 | **Evidence on the chart** | Pull in news articles and X posts. Each one is classified for sentiment and pinned to the moment it was published, so you can see what came before the move. |
 | **Ask the evidence** | Run questions over the evidence you collected, e.g. *"what % of these are about supply-chain risk?"* |
@@ -74,6 +74,7 @@ flowchart LR
     subgraph AI["AI layer (Nicrron gateway)"]
         LLM[LLM client<br/>structured extraction]
         JEV[Jev classifier<br/>sentiment / yes-no / multi-label]
+        EMB[Embeddings<br/>voyage-finance-2]
     end
 
     DB[(PostgreSQL)]
@@ -97,8 +98,10 @@ flowchart LR
     DB --> DET --> DB
     DB --> ENR --> DB
     DB --> IMP --> DB
+    ENR --> EMB
     ENR --> JEV
     IMP --> JEV
+    R3 --> EMB
     SEC --> CG
     N --> CG
     X --> CG
@@ -126,8 +129,10 @@ flowchart LR
    that baseline and writes an `alerts` row (with a Postgres `NOTIFY`) when a
    move is real.
 4. **Enrichment** tags each market event with the companies and themes it
-   affects (`market_entities`), using a two-pass classifier: categories first,
-   then entities within them.
+   affects (`market_entities`):
+   - the classifier picks the categories,
+   - embeddings shortlist the closest entities in each,
+   - one classifier call confirms them.
 5. **Alert impact** listens for new alerts and matches each one to companies
    in three tiers:
    - **Tier 1:** the market names the company directly.
@@ -163,20 +168,42 @@ are excluded.
 
 ### AI layer
 
-All model calls go through the **[Nicrron](https://nicrron.ai) gateway**
-(OpenAI-compatible, `nicrron/auto` routing by default), so models can be swapped
-with one setting and no code changes.
+All model calls go through the **[Nicrron](https://nicrron.ai) gateway** with one key
+(OpenAI-compatible, `nicrron/auto` routing by default), so models can be swapped with one
+setting and no code changes. Calls retry on rate limits, using `Retry-After`.
 
-- **`backend/llm`:** structured extraction. The model's JSON is validated
-  against a Pydantic schema, and invalid output is rejected rather than guessed.
-- **`backend/classification` (Jev):** a typed question contract with three
-  question types: `noul` (yes/no probability), `choice` (one label with
-  per-label probabilities) and `score` (ordered rubric). On top of these sit
-  the sentiment, boolean, choice, multi-select and score modes. Answers are
-  normalized to the same calibrated shape whichever model answers them.
-- **Grounding rules:** every graph link and highlight must carry a source URL
-  from a real fetch in that run. Nothing is saved from model memory, and no
-  wording predicts a price or suggests a trade.
+| Piece | Nicrron model | What it does |
+|---|---|---|
+| `backend/llm/client.py` | `nicrron/auto` | Structured extraction (graph relationships, highlights). JSON is validated against a Pydantic schema, and invalid output is rejected rather than guessed. |
+| `backend/classification` (Jev contract) | `nicrron/auto` | A typed question contract with three question types: `noul` (yes/no probability), `choice` (one label with per-label probabilities) and `score` (ordered rubric). On top of these sit the sentiment, boolean, choice, multi-select and score modes. A chat model answers, and the reply is normalized into the calibrated Jev answer shape. |
+| `backend/llm/embeddings.py` | `voyage/voyage-finance-2` | Finance-tuned embeddings (1024-d) used for retrieval in front of the classifier. |
+
+**Retrieve, then judge.** Embeddings choose *what to ask*, and the classifier decides *what is true*:
+
+- **Semantic market search** (`GET /markets/search`): a plain-English risk is
+  embedded and ranked against every open market event (cosine similarity, one
+  market per event, untraded markets dropped). Event vectors are stored in
+  `market_embeddings` and only re-embedded when the market text changes.
+- **Enrichment shortlist:** instead of asking the classifier about every entity
+  in every chosen category, each event's embedding retrieves the 12 closest
+  entities per category, and the classifier checks them all in **one** call.
+  The classifier still has to say yes to each candidate at the threshold.
+
+Measured on the same 20 live markets (`scripts/compare_enrichment.py`):
+
+| | v1: full category walk | v2: embedding shortlist |
+|---|---|---|
+| Classifier calls | 77 | **40** (2 per event, flat) |
+| Same tags as v1 | — | 15/20 events identical, 88% of v1's tags found |
+| Worker throughput | ~8.7 s/event | **~2.8 s/event** |
+
+Most of the tags v2 misses are second-order, like `Pete Hegseth` on a ceasefire
+market or `Oil and Gas` on an airspace closure. Set `ENRICH_SHORTLIST=0` to go
+back to the full walk.
+
+**Grounding rules:** every graph link and highlight must carry a source URL from
+a real fetch in that run. Nothing is saved from model memory, and no wording
+predicts a price or suggests a trade.
 
 ---
 
@@ -184,12 +211,12 @@ with one setting and no code changes.
 
 | Layer | Choice |
 |---|---|
-| Backend | Python 3.11+, FastAPI, SQLAlchemy 2 (async) + asyncpg, httpx, Pydantic 2, `uv` |
+| Backend | Python 3.11+, FastAPI, SQLAlchemy 2 (async) + asyncpg, httpx, Pydantic 2, NumPy, `uv` |
 | Database | PostgreSQL (tables created from the models; no migrations) |
 | Frontend | React 18, TypeScript, Vite, Tailwind, Radix Themes, Motion, react-force-graph-2d, Recharts |
-| AI | Nicrron gateway (`nicrron/auto`); optional TypeSafe Jev, Anthropic |
+| AI | Nicrron gateway: `nicrron/auto` for reasoning, `voyage/voyage-finance-2` for embeddings; optional TypeSafe Jev, Anthropic |
 | Data | Kalshi, Polymarket (global + US), SEC EDGAR, NewsAPI, X API, Alpaca |
-| Tests | pytest (640+ tests), Vitest (118 tests) |
+| Tests | pytest (650+ tests), Vitest (120+ tests) |
 
 ## Repository layout
 
@@ -201,7 +228,7 @@ backend/
   enrichment/          market → company tagging worker + search queries
   alert_impact/        alert → affected companies worker (tiers 1–3)
   classification/      Jev question contract, modes, relevance filter, sentiment cache
-  llm/                 structured-output LLM client (Nicrron / OpenRouter / Gemini)
+  llm/                 Nicrron client: structured output (client.py) + embeddings (embeddings.py)
   entities/            entity map (companies, sectors, themes) + matcher
   evidence/            news fetch + cache
   models/              SQLAlchemy models, one per table
@@ -270,8 +297,8 @@ uv run python -m backend.alert_impact           # alert → affected companies
 | `X_BEARER_TOKEN` | X posts as evidence + highlights | [developer.x.com](https://developer.x.com) | Placeholder posts |
 | `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` | Kalshi live stream | kalshi.com → API keys | Kalshi charts still work (public) |
 | `POLYMARKET_US_KEY_ID` / `_SECRET_KEY` | Polymarket US stream | polymarket.us/developer | Global Polymarket needs no key |
-| `TYPESAFE_API_KEY` | Optional: native Jev model | typesafe.ai | Classifier runs on Nicrron |
-| `OPENROUTER` | Optional fallback provider | openrouter.ai | — |
+| `TYPESAFE_API_KEY` | Optional: native Jev model for classification | typesafe.ai | Classifier runs on Nicrron |
+| `NICRRON_EMBED_MODEL` | Optional: embedding model | — | `voyage/voyage-finance-2` |
 
 All tuning knobs (alert thresholds, cache TTLs, daily API budgets) are
 documented in [`.env.example`](.env.example).
@@ -284,6 +311,7 @@ documented in [`.env.example`](.env.example).
 | `GET /graph/{ticker}` | Company graph: nodes, links with evidence, highlights (polled while building) |
 | `GET /graph/{ticker}/board` · `/graph/{ticker}/news/{other}` | Directors · news about two linked companies together |
 | `GET /entities/{company}/top-markets` | Markets that matter to a company, ranked by tier |
+| `GET /markets/search?q=` | Semantic search: open markets about a plain-English risk or event |
 | `GET /markets/{id}/history?stock=&range=` | Market odds + stock bars on the same interval |
 | `GET /evidence/news` · `GET /twitter/search` | Candidate evidence items |
 | `POST /classification/sentiment` · `/query` | Per-item sentiment · % of evidence answering a question |

@@ -11,8 +11,7 @@ Flow, for one search:
 2. Articles are deduplicated by URL and by normalized title (syndicated copies of one story).
 3. `classify_event(item)` asks Jev for one of `schemas.NEWS_EVENT_TYPES`, or `none` (opinion,
    roundups, anything else), which maps to None. With GRAPH_LLM_PROVIDER=anthropic it asks Claude
-   through `llm.complete` instead, with the same labels and descriptions, so F6 runs without an
-   OpenRouter key.
+   through `llm.complete` instead, with the same labels and descriptions.
 4. `save_news_events(session, events)` adds one `graph_events` row per (company, story), skipping
    rows that already exist. It does not commit.
 

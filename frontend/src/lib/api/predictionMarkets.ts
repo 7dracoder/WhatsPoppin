@@ -218,14 +218,52 @@ export async function fetchRecommendedMarkets(
   }
 }
 
+/** Shape of GET /markets/search (backend/api/market_search.py::MarketMatchOut). */
+interface MarketMatchWire {
+  source: string;
+  market_id: string;
+  event_id: string | null;
+  title: string | null;
+  outcome_label: string | null;
+  event_title: string | null;
+  rules_primary: string | null;
+  close_time: string | null;
+  url: string | null;
+  score: number; // cosine similarity to the query
+  model: string; // embedding model, e.g. "voyage/voyage-finance-2"
+}
+
 /**
- * Mocks POST /markets/match, which should eventually run the free-text query
- * through the Jev classifier against every open market on both venues and
- * return the ones it judges relevant. The mock fakes that with keyword overlap,
- * so "chips in China" matches the export-restriction markets the way Jev would.
- * Latency is long on purpose: a real run is one LLM pass per market.
+ * GET /markets/search: the free-text query ranked against every open market by
+ * embedding similarity (voyage-finance-2 via Nicrron), one market per event.
+ * An empty list is a real answer. Only a backend failure falls back to keyword
+ * overlap over the sample catalog.
  */
 export async function matchMarkets(query: string): Promise<PredictionMatch[]> {
+  if (query.trim().length < 2) return [];
+  try {
+    const rows = await get<MarketMatchWire[]>(`/markets/search?q=${encodeURIComponent(query.trim())}&limit=10`);
+    return rows.map((m) => ({
+      id: m.market_id,
+      source: toSource(m.source),
+      title: m.event_title ?? m.title ?? m.market_id,
+      outcome: m.outcome_label,
+      question: m.event_title && m.title && m.title !== m.event_title ? m.title : null,
+      rules: m.rules_primary,
+      category: "",
+      closeTime: m.close_time,
+      url: m.url,
+      matchScore: m.score,
+      matchReason: `Semantic match · ${m.model.split("/").pop()}`,
+    }));
+  } catch (error) {
+    console.warn("GET /markets/search unavailable, using keyword match over sample markets", error);
+    return sampleMatches(query);
+  }
+}
+
+/** Keyword overlap over the sample catalog: the offline stand-in for /markets/search. */
+function sampleMatches(query: string): Promise<PredictionMatch[]> {
   const tokens = query
     .toLowerCase()
     .split(/[^a-z0-9]+/)
@@ -244,13 +282,13 @@ export async function matchMarkets(query: string): Promise<PredictionMatch[]> {
       {
         ...toMarket(entry),
         matchScore: Math.min(1, hits.length / tokens.length),
-        matchReason: `Matches ${hits.map((h) => `"${h}"`).join(", ")}`,
+        matchReason: `Sample data · matches ${hits.map((h) => `"${h}"`).join(", ")}`,
       },
     ];
   });
 
   matches.sort((a, b) => b.matchScore - a.matchScore);
-  return delay(matches, 1600);
+  return delay(matches, 600);
 }
 
 /** Shape of GET /markets/{id}/outcomes (backend/api/market_history.py::OutcomeOut). */

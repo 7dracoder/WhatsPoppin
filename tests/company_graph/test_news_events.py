@@ -313,7 +313,7 @@ def test_search_terms_fall_back_to_symbol_for_non_us_companies():
         "Samsung Electronics", "Tesla"]
 
 
-# --- classification with GRAPH_LLM_PROVIDER=anthropic (no OpenRouter, no Jev) --------------------
+# --- classification with GRAPH_LLM_PROVIDER=anthropic (no Nicrron, no Jev) --------------------
 
 class FakeComplete:
     """Stands in for llm.complete: answers with keyword_label(title + text) and records the prompts."""
@@ -366,11 +366,11 @@ def test_anthropic_none_label_maps_to_none(monkeypatch):
     assert ne.classify_event(item, provider="anthropic") is None
 
 
-def test_explicit_openrouter_provider_still_uses_jev(monkeypatch):
+def test_explicit_nicrron_provider_still_uses_jev(monkeypatch):
     from company_graph import llm
 
     def no_model(*args, **kwargs):
-        raise AssertionError("the model must not be used with the openrouter provider")
+        raise AssertionError("the model must not be used with the nicrron provider")
 
     class Result:
         label = "recall"
@@ -378,7 +378,7 @@ def test_explicit_openrouter_provider_still_uses_jev(monkeypatch):
     monkeypatch.setenv("GRAPH_LLM_PROVIDER", "anthropic")
     monkeypatch.setattr(llm, "complete", no_model)
     item = ne.ContentItem(id="u", title="t", url="https://x.com/u", published_at=NOW)
-    assert ne.classify_event(item, classifier=lambda *a: Result(), provider="openrouter") == "recall"
+    assert ne.classify_event(item, classifier=lambda *a: Result(), provider="nicrron") == "recall"
 
 
 def test_refresh_with_anthropic_provider_saves_typed_events(store, session, anthropic_model):

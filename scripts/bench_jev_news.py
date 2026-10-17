@@ -1,5 +1,5 @@
 """Fetch real NVDA news from NewsAPI and run the classification/ library
-(Jev, via OpenRouter) against every article, to see real latency numbers
+(Jev questions, via the Nicrron gateway) against every article, to see real latency numbers
 and a human-reviewable transcript — not a synthetic smoke test.
 
 This measures SPEED (per-call latency, end-to-end time) directly. It does
@@ -37,7 +37,7 @@ articles already saved by try_news_api.py instead of fetching again:
 
 Usage:
     python scripts/bench_jev_news.py [--count N] [--mode sentiment|boolean] [--concurrency N] [--out PATH] [--no-relevance-filter] [--input PATH]
-    # needs OPENROUTER set (env or .env); NEWSAPI_KEY only if --input isn't given
+    # needs NICRRON_API_KEY set (env or .env); NEWSAPI_KEY only if --input isn't given
 """
 
 import argparse
@@ -131,7 +131,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    require_env("OPENROUTER")
+    require_env("NICRRON_API_KEY")
 
     if args.input is not None:
         data = json.loads(args.input.read_text())

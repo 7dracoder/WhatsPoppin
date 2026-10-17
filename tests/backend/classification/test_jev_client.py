@@ -19,9 +19,9 @@ def _jev_response(answers: dict) -> httpx.Response:
 def api_key(monkeypatch):
     # TYPESAFE_API_KEY takes priority when set, so clear it explicitly — otherwise a real
     # value leaking in via backend.main's load_dotenv() (any test importing it in this same
-    # pytest session) would silently win over this fixture's OPENROUTER test key.
-    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
-    monkeypatch.setenv("OPENROUTER", "test-key")
+    # pytest session) would silently win. These wire-contract tests run on the native Jev path.
+    monkeypatch.delenv("NICRRON_API_KEY", raising=False)
+    monkeypatch.setenv("TYPESAFE_API_KEY", "test-key")
 
 
 def test_call_jev_parses_noul_answer():
@@ -66,8 +66,8 @@ def test_call_jev_parses_choice_answer():
 
 
 def test_call_jev_raises_on_missing_api_key(monkeypatch):
-    monkeypatch.delenv("OPENROUTER", raising=False)
-    with pytest.raises(JevError, match="TYPESAFE_API_KEY"):
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    with pytest.raises(JevError, match="NICRRON_API_KEY"):
         call_jev("text", {"main": NoulQuestion(instructions="q")})
 
 
@@ -88,23 +88,6 @@ def test_call_jev_prefers_typesafe_when_its_key_is_set(monkeypatch):
     )
 
     assert result == {"main": NoulAnswer(noul=0.42)}
-
-
-def test_call_jev_falls_back_to_openrouter_without_typesafe_key():
-    def handler(request: httpx.Request) -> httpx.Response:
-        assert str(request.url) == "https://openrouter.ai/api/alpha/decisions"
-        assert request.headers["Authorization"] == "Bearer test-key"
-        body = json.loads(request.content)
-        assert body["model"] == "typesafe/jev-1.13"
-        return _jev_response({"main": {"type": "noul", "noul": 0.1}})
-
-    result = call_jev(
-        "some text",
-        {"main": NoulQuestion(instructions="is this bullish?")},
-        http_client=_client_with(handler),
-    )
-
-    assert result == {"main": NoulAnswer(noul=0.1)}
 
 
 def test_call_jev_raises_on_unknown_answer_type():
@@ -154,6 +137,7 @@ def _chat(content) -> httpx.Response:
 def test_call_jev_uses_nicrron_chat_and_returns_jev_shapes(monkeypatch):
     from backend.classification.primitives import ScoreAnswer, ScoreQuestion
 
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
     monkeypatch.setenv("NICRRON_API_KEY", "n-key")
     seen = {}
 
@@ -187,6 +171,7 @@ def test_call_jev_uses_nicrron_chat_and_returns_jev_shapes(monkeypatch):
 
 
 def test_call_jev_via_nicrron_raises_on_missing_answer(monkeypatch):
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
     monkeypatch.setenv("NICRRON_API_KEY", "n-key")
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -208,6 +193,7 @@ def test_typesafe_still_wins_over_nicrron(monkeypatch):
 
 
 def test_call_jev_via_nicrron_accepts_a_bare_number_for_yes_no(monkeypatch):
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
     monkeypatch.setenv("NICRRON_API_KEY", "n-key")
 
     def handler(request: httpx.Request) -> httpx.Response:

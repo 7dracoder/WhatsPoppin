@@ -23,7 +23,7 @@ uv run python -m backend.enrichment --once   # one batch, then exit
 uv run uvicorn backend.main:app           # API on http://localhost:8000
 ```
 
-Needs `DATABASE_URL` and `OPENROUTER` in `.env`. Optional settings are listed in `.env.example`.
+Needs `DATABASE_URL` and `NICRRON_API_KEY` in `.env`. Optional settings are listed in `.env.example`.
 
 ## How it works
 

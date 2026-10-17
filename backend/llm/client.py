@@ -7,10 +7,14 @@ source-specific prompt and response model (e.g.
 ingestion/news_api/query_translator.py -> NewsQueryFilters); they all call
 through this one function so there's a single place that knows how to
 talk to the LLM provider, handle its errors, and validate its output.
+
+Provider: the Nicrron gateway (api.nicrron.ai, OpenAI-compatible) with NICRRON_API_KEY.
+LLM_PROVIDER=gemini with GEMINI_API_KEY is the one alternative (same request shape).
 """
 
 import os
 import re
+import time
 from typing import TypeVar
 
 import httpx
@@ -18,39 +22,31 @@ from pydantic import BaseModel, ValidationError
 
 T = TypeVar("T", bound=BaseModel)
 
-# Nicrron gateway (api.nicrron.ai): OpenAI-compatible chat completions in front of every major
-# lab, so the request shape below is unchanged. The default whenever NICRRON_API_KEY is set.
-NICRRON_URL = "https://api.nicrron.ai/v1/chat/completions"
+NICRRON_BASE_URL = "https://api.nicrron.ai/v1"
+NICRRON_URL = f"{NICRRON_BASE_URL}/chat/completions"
 NICRRON_DEFAULT_MODEL = "nicrron/auto"  # gateway-side routing by prompt size, complexity and provider health
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "anthropic/claude-haiku-5.5"  # cheap/fast; this is structured extraction, not reasoning
+DEFAULT_MODEL = NICRRON_DEFAULT_MODEL
 
 # Google's OpenAI-compatible endpoint: same request shape (chat completions + response_format), so
-# LLM_PROVIDER=gemini with GEMINI_API_KEY swaps the vendor without touching any caller. Google's
-# free tier makes it the fallback when OpenRouter credits run out.
+# LLM_PROVIDER=gemini with GEMINI_API_KEY swaps the vendor without touching any caller.
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 GEMINI_DEFAULT_MODEL = "gemini-2.5-flash"
 
 
 def provider() -> str:
-    """"nicrron", "openrouter" or "gemini", from LLM_PROVIDER. Unset: nicrron when
-    NICRRON_API_KEY is set, otherwise openrouter."""
-    explicit = (os.environ.get("LLM_PROVIDER") or "").strip().lower()
-    if explicit:
-        return explicit
-    return "nicrron" if os.environ.get("NICRRON_API_KEY") else "openrouter"
+    """"nicrron" (default) or "gemini", from LLM_PROVIDER."""
+    return (os.environ.get("LLM_PROVIDER") or "nicrron").strip().lower()
 
 
 def has_llm_key() -> bool:
     """True when the configured provider has its key, so workers can fail fast at startup."""
-    key = {"nicrron": "NICRRON_API_KEY", "gemini": "GEMINI_API_KEY"}.get(provider(), "OPENROUTER")
-    return bool(os.environ.get(key))
+    return bool(os.environ.get("GEMINI_API_KEY" if provider() == "gemini" else "NICRRON_API_KEY"))
 
 
 def nicrron_model(model: str | None) -> str:
     """The model id sent to Nicrron: LLM_MODEL, else NICRRON_MODEL, else the caller's model, else
-    nicrron/auto. Nicrron spells Anthropic versions with hyphens ("claude-haiku-5-5"), so an
-    OpenRouter-style "claude-haiku-5.5" from an older setting is rewritten to match."""
+    nicrron/auto. Nicrron spells Anthropic versions with hyphens ("claude-haiku-5-5"), so a
+    dotted "claude-haiku-5.5" from an older setting is rewritten to match."""
     chosen = os.environ.get("LLM_MODEL") or os.environ.get("NICRRON_MODEL") or model or NICRRON_DEFAULT_MODEL
     if chosen.startswith("anthropic/"):
         chosen = re.sub(r"(\d)\.(\d)", r"\1-\2", chosen)
@@ -58,25 +54,42 @@ def nicrron_model(model: str | None) -> str:
 
 
 def resolve_endpoint(model: str | None) -> tuple[str, str, str]:
-    """(url, api_key, model) for the configured provider. An OpenRouter-style model name
-    ("anthropic/claude-haiku-5.5") means nothing to Gemini, so under gemini any model that isn't a
+    """(url, api_key, model) for the configured provider. A gateway model name ("nicrron/auto",
+    "anthropic/claude-haiku-5-5") means nothing to Gemini, so under gemini any model that isn't a
     Gemini one falls back to GEMINI_DEFAULT_MODEL (or LLM_MODEL when set).
     """
-    if provider() == "nicrron":
-        key = os.environ.get("NICRRON_API_KEY")
-        if not key:
-            raise LlmError("LLM_PROVIDER=nicrron but NICRRON_API_KEY is not set in environment")
-        return NICRRON_URL, key, nicrron_model(model)
     if provider() == "gemini":
         key = os.environ.get("GEMINI_API_KEY")
         if not key:
             raise LlmError("LLM_PROVIDER=gemini but GEMINI_API_KEY is not set in environment")
         chosen = os.environ.get("LLM_MODEL") or (model if model and model.startswith("gemini") else GEMINI_DEFAULT_MODEL)
         return GEMINI_URL, key, chosen
-    key = os.environ.get("OPENROUTER")
+    key = os.environ.get("NICRRON_API_KEY")
     if not key:
-        raise LlmError("OPENROUTER API key not set in environment")
-    return OPENROUTER_URL, key, os.environ.get("LLM_MODEL") or model or DEFAULT_MODEL
+        raise LlmError("NICRRON_API_KEY is not set in environment")
+    return NICRRON_URL, key, nicrron_model(model)
+
+
+RETRY_STATUSES = {429, 502, 503, 504}
+MAX_ATTEMPTS = 5
+MAX_BACKOFF_S = 30.0
+
+
+def post_with_retry(client: httpx.Client, url: str, *, headers: dict, json: dict, timeout: float,
+                    sleep=time.sleep) -> httpx.Response:
+    """POST, retrying a rate limit (Nicrron allows 60 requests a minute per key) or a gateway hiccup.
+    Waits for Retry-After when the response says, else 2, 4, 8, 16 s. Returns the last response
+    (raise_for_status is the caller's); transport errors propagate as httpx.HTTPError."""
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        response = client.post(url, headers=headers, json=json, timeout=timeout)
+        if response.status_code not in RETRY_STATUSES or attempt == MAX_ATTEMPTS:
+            return response
+        try:
+            wait = float(response.headers.get("retry-after", ""))
+        except ValueError:
+            wait = 2.0 ** attempt
+        sleep(min(max(wait, 0.5), MAX_BACKOFF_S))
+    return response  # unreachable; keeps type checkers happy
 
 
 def strip_json_fences(content: str) -> str:
@@ -109,7 +122,6 @@ def complete_structured(
     defaults to a real httpx.Client otherwise.
     """
     url, api_key, model = resolve_endpoint(model)
-
     schema = response_model.model_json_schema()
     full_system_prompt = (
         f"{system_prompt}\n\n"
@@ -120,7 +132,8 @@ def complete_structured(
 
     client = http_client or httpx.Client()
     try:
-        response = client.post(
+        response = post_with_retry(
+            client,
             url,
             headers={"Authorization": f"Bearer {api_key}"},
             json={

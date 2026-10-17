@@ -57,8 +57,8 @@ Fixed during the live runs: SEC full-text search 500s are retried; reverse looku
 | Kalshi and Polymarket ingestion | `backend/ingestion/kalshi/`, `backend/ingestion/polymarket/`, `backend/ingestion/polymarket_us/`, `backend/ingestion/common/` | Read the `markets` table. Never write to it. |
 | Alert detector | `alert_detector/`, model `backend/models/alert.py`, table `alerts` | Read `alerts` rows as "a market moved" events. Never update `status` or `claimed_at`: the planned enricher claims alerts through those columns. |
 | SQLAlchemy base and engine | `backend/models/base.py`, `backend.ingestion.common.db.make_engine` and `connect` | Import them. Tables are created with `Base.metadata.create_all`; there are no migrations. The database code is async (asyncpg). |
-| LLM client | `backend/llm/client.py`, `complete_structured(system, user, response_model, model=DEFAULT_MODEL)` | Every free-form model call (F4, F8). It calls OpenRouter with the `OPENROUTER` key and parses the reply into a Pydantic model. Raises `LlmError`. Synchronous. |
-| Jev classifier | `backend/classification/`, `classify(title, text, spec)` with `ChoiceSpec`, `BooleanSpec` and others; `is_relevant` and `filter_relevant` in `relevance.py` | F6's event typing and relevance filtering. Uses the same `OPENROUTER` key. Raises `JevError`. Synchronous. |
+| LLM client | `backend/llm/client.py`, `complete_structured(system, user, response_model, model=DEFAULT_MODEL)` | Every free-form model call (F4, F8). It calls the Nicrron gateway with `NICRRON_API_KEY` and parses the reply into a Pydantic model. Raises `LlmError`. Synchronous. |
+| Jev classifier | `backend/classification/`, `classify(title, text, spec)` with `ChoiceSpec`, `BooleanSpec` and others; `is_relevant` and `filter_relevant` in `relevance.py` | F6's event typing and relevance filtering. Uses the same `NICRRON_API_KEY`. Raises `JevError`. Synchronous. |
 | Entity matching | `backend/entities/`, `EntityAlias`, `EntityMatcher` | F1's `aliases_for` returns `EntityAlias` objects so news can be tagged by company. |
 | News fetch | `backend/ingestion/news_api/`, `poll_news(filters, gateway, entities)`, `NewsQueryFilters`, `NewsApiGateway` | Call `poll_news`. It is synchronous, does not store anything, does not deduplicate, and does not classify. |
 | Stock prices | `backend/ingestion/alpaca/`, `fetch_price_series(ticker, tier, gateway)` with `ZoomTier` and `AlpacaApiGateway(key_id, secret_key)` | F8's `price_change_pct`. Needs `ALPACA_API_KEY_ID` and `ALPACA_API_SECRET_KEY`. Free tier delays the last 15 minutes. |
@@ -91,7 +91,7 @@ Fixed during the live runs: SEC full-text search 500s are retried; reverse looku
 | Who creates the FastAPI app, and at what path? | F9 | Resolved. The app is `backend/main.py` (run with `uv run uvicorn backend.main:app --reload`), with one router per area in `backend/api/` (see `new_specs/fastapi.md`). CORS allows the Vite dev server. |
 | Where does the `entities` model come from? | F0 | Resolved: F0 added it. |
 | May `entity_relationships` gain `summary` and `evidence_url`? | F0 | Resolved: added, and `db-design.md` updated. |
-| Which LLM provider? Who builds Jev? | F4, F6, F8 | Resolved: OpenRouter through `backend/llm`; Jev is `backend/classification`. |
+| Which LLM provider? Who builds Jev? | F4, F6, F8 | Resolved: the Nicrron gateway through `backend/llm`; Jev is `backend/classification`. |
 | Which stock price source? | F8 | Resolved: Alpaca, `backend/ingestion/alpaca`. |
 | What happened to `company-network.md`? | Nothing now | Resolved: that spec was deleted; this file replaces it. |
 | May `entity_relationships` gain `tags`? | F14 | Resolved: added (`TEXT[]`), `db-design.md` updated, column added on the shared database via a manual `ALTER TABLE` (no migrations, so `create_all` won't add it to a table that already exists). |
@@ -167,14 +167,14 @@ The result is called a highlight, not a signal, because `alert_detector/signals.
 | `GRAPH_NEWS_TTL_HOURS` | 6 | How long one company's news result is reused |
 | `GRAPH_NEWS_DAILY_BUDGET` | 40 | Most NewsAPI requests this feature may make per day (the account-wide limit is 100) |
 | `GRAPH_FAKE` | 0 | When 1, serve fixture data and call no outside service |
-| `GRAPH_LLM_PROVIDER` | `openrouter` | `openrouter` (the shared client) or `anthropic` (Claude directly, through the Anthropic SDK) for F4, F6 typing and F8 |
-| `GRAPH_LLM_MODEL` | `backend/llm/client.py`'s `DEFAULT_MODEL` | OpenRouter model id (the default is retired; set this when using OpenRouter) |
+| `GRAPH_LLM_PROVIDER` | `nicrron` | `nicrron` (the shared client) or `anthropic` (Claude directly, through the Anthropic SDK) for F4, F6 typing and F8 |
+| `GRAPH_LLM_MODEL` | `backend/llm/client.py`'s `DEFAULT_MODEL` (`nicrron/auto`) | Nicrron model id |
 | `GRAPH_ANTHROPIC_MODEL` | `claude-opus-5-5` | Claude model id when `GRAPH_LLM_PROVIDER=anthropic`; `claude-haiku-5-5` costs about 1/40th |
 | `ANTHROPIC_API_KEY` | none | Read by the Anthropic SDK when `GRAPH_LLM_PROVIDER=anthropic` |
 | `SEC_CONTACT_EMAIL` | none | Sent in the SEC User-Agent header; required for any SEC call |
 | `NEWSAPI_KEY` | none | NewsAPI key, shared with the news ingestion |
 | `DATABASE_URL` | none | The shared database |
-| `OPENROUTER` | none | Read by `backend/llm` and Jev directly, not by `config.py`; needed when the provider is `openrouter` |
+| `NICRRON_API_KEY` | none | Read by `backend/llm` and Jev directly, not by `config.py`; needed when the provider is `nicrron` |
 | `ALPACA_API_KEY_ID`, `ALPACA_API_SECRET_KEY` | none | Optional; read by F8 for the price change (null without them) |
 
 ## Build order
@@ -251,7 +251,7 @@ Suggested next, outside the original plan: colour the searched company when a hi
 
 **Status:** done. **Files:** `company_graph/llm.py`, `company_graph/extract.py`
 
-**As built:** `llm.complete` uses the shared OpenRouter client by default, or Claude directly through the Anthropic SDK with `GRAPH_LLM_PROVIDER=anthropic` (structured outputs into the Pydantic model, low effort, server-side fallbacks where the model supports them). Failures are `LlmError` either way.
+**As built:** `llm.complete` uses the shared Nicrron client by default, or Claude directly through the Anthropic SDK with `GRAPH_LLM_PROVIDER=anthropic` (structured outputs into the Pydantic model, low effort, server-side fallbacks where the model supports them). Failures are `LlmError` either way.
 
 **Build:**
 - `llm.py`: a thin wrapper, `complete(system, user, response_model)`, over the shared `backend.llm.client.complete_structured` with `model` set from `GRAPH_LLM_MODEL`, so the model can be swapped in one place. Every free-form model call in this feature (F4, F8) goes through it. It is synchronous; call it through `asyncio.to_thread`.

@@ -1,16 +1,13 @@
-"""Manual smoke test for the classification/ library (Jev, via OpenRouter)
-— run this directly to see real Jev answers printed to the terminal for
-one example question of every mode, no backend/frontend needed.
+"""Manual smoke test for the classification/ library (Jev questions, via the
+Nicrron gateway) — run this directly to see real answers printed to the
+terminal for one example question of every mode, no backend/frontend needed.
 
 Usage:
-    OPENROUTER=your_key_here python scripts/try_jev.py
-    # or add OPENROUTER=... to the repo's .env file and just run:
+    NICRRON_API_KEY=your_key_here python scripts/try_jev.py
+    # or add NICRRON_API_KEY=... to the repo's .env file and just run:
     python scripts/try_jev.py
 
-Get a key at https://openrouter.ai (Account -> API keys). classify()
-reads the env var OPENROUTER specifically (not OPENROUTER_API_KEY, which
-is what .env.example currently names it — rename/add the line if you hit
-"OPENROUTER API key not set").
+Get a key at https://nicrron.ai.
 """
 
 import os
@@ -54,24 +51,18 @@ def _load_dotenv_fallback(key: str) -> str | None:
 
 
 def check_api_key() -> None:
-    if os.environ.get("OPENROUTER"):
+    if os.environ.get("NICRRON_API_KEY"):
         return
-    fallback = _load_dotenv_fallback("OPENROUTER")
+    fallback = _load_dotenv_fallback("NICRRON_API_KEY")
     if fallback:
-        os.environ["OPENROUTER"] = fallback
+        os.environ["NICRRON_API_KEY"] = fallback
         return
-    hint = ""
-    if _load_dotenv_fallback("OPENROUTER_API_KEY"):
-        hint = (
-            "\nFound OPENROUTER_API_KEY in .env instead — classify() reads OPENROUTER, "
-            "so add/rename a line to:\n  OPENROUTER=<same key>"
-        )
     print(
-        "No OPENROUTER key found (checked env and .env)." + hint + "\n"
-        "Get one at https://openrouter.ai -> Account -> API keys, then either:\n"
-        "  export OPENROUTER=your_key_here\n"
+        "No NICRRON_API_KEY found (checked env and .env).\n"
+        "Get one at https://nicrron.ai, then either:\n"
+        "  export NICRRON_API_KEY=your_key_here\n"
         "or add a line to .env:\n"
-        "  OPENROUTER=your_key_here",
+        "  NICRRON_API_KEY=your_key_here",
         file=sys.stderr,
     )
     sys.exit(1)
@@ -121,7 +112,7 @@ TEST_CASES = [
             },
         ),
     ),
-    # multi_select -> N independent Noul calls under the hood (Jev has no native multi-select)
+    # multi_select -> N independent Noul questions in one call (Jev has no native multi-select)
     TestCase(
         mode="multi_select",
         title="US tightens export controls on advanced chips to China",
