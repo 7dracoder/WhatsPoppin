@@ -1,4 +1,5 @@
 # What'sPoppin
+brought to you by Subhradeep(sa9457@nyu.edu) and Tanmay(ts5789@nyu.edu)
 
 **Prediction markets, news and social chatter, mapped to the companies they move.**
 
