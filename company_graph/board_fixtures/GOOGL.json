@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000044",
+      "name": "Evander Stonecroft",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/googl-form4#eva",
+      "filed_at": "2026-09-23"
+    },
+    {
+      "id": "cik-9990000046",
+      "name": "Lucius Bramblecott",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/googl-form4#luc",
+      "filed_at": "2026-06-13"
+    },
+    {
+      "id": "cik-9990000045",
+      "name": "Millicent Featherby",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/googl-form4#mil",
+      "filed_at": "2026-05-06"
+    }
+  ]
+}

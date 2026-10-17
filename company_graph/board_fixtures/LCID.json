@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "LCID",
+    "name": "Lucid Group, Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000035",
+      "name": "Gwendolyn Tarnbrook",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/lcid-form4#gwe",
+      "filed_at": "2026-05-08"
+    },
+    {
+      "id": "cik-9990000037",
+      "name": "Hermia Larkspur-Dunn",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/lcid-form4#her",
+      "filed_at": "2026-07-22"
+    },
+    {
+      "id": "cik-9990000036",
+      "name": "Peregrine Oddfellow",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/lcid-form4#per",
+      "filed_at": "2026-06-15"
+    }
+  ]
+}

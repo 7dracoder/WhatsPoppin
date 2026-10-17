@@ -1,0 +1,37 @@
+{
+  "company": {
+    "symbol": "AMD",
+    "name": "Advanced Micro Devices, Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000055",
+      "name": "Aurelia Pondsworth",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/amd-form4#aur",
+      "filed_at": "2026-05-04"
+    },
+    {
+      "id": "cik-9990000009",
+      "name": "Clementine Wispwood",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/amd-form4#cle",
+      "filed_at": "2026-08-14"
+    },
+    {
+      "id": "cik-9990000054",
+      "name": "Silas Greywether",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/amd-form4#sil",
+      "filed_at": "2026-09-21"
+    },
+    {
+      "id": "cik-9990000053",
+      "name": "Verity Mapleshaw",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/amd-form4#ver",
+      "filed_at": "2026-08-14"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "company": {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000016",
+      "name": "Algernon Gryphonmoor",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/msft-form4#gry",
+      "filed_at": "2026-06-17"
+    },
+    {
+      "id": "cik-9990000014",
+      "name": "Leopold Snodgrove",
+      "role": "Chairman and Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/msft-form4#sno",
+      "filed_at": "2026-07-05"
+    },
+    {
+      "id": "cik-9990000012",
+      "name": "Montague Tugwillow",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/msft-form4#tug",
+      "filed_at": "2026-09-09"
+    },
+    {
+      "id": "cik-9990000015",
+      "name": "Wilhelmina Pennyfarthing",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/msft-form4#pen",
+      "filed_at": "2026-04-13"
+    }
+  ]
+}

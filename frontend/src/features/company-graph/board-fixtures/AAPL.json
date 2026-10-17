@@ -1,0 +1,44 @@
+{
+  "company": {
+    "symbol": "AAPL",
+    "name": "Apple Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000013",
+      "name": "Araminta Harrowgate",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/aapl-form4#har",
+      "filed_at": "2026-06-17"
+    },
+    {
+      "id": "cik-9990000011",
+      "name": "Evadne Nymphlet",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/aapl-form4#nym",
+      "filed_at": "2026-09-09"
+    },
+    {
+      "id": "cik-9990000010",
+      "name": "Horatio Dabblestone",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/aapl-form4#dab",
+      "filed_at": "2026-07-05"
+    },
+    {
+      "id": "cik-9990000012",
+      "name": "Montague Tugwillow",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/aapl-form4#tug",
+      "filed_at": "2026-04-13"
+    },
+    {
+      "id": "cik-9990000007",
+      "name": "Seraphina Lunderquist",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/aapl-form4#lun",
+      "filed_at": "2026-08-21"
+    }
+  ]
+}

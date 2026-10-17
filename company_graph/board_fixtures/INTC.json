@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "INTC",
+    "name": "Intel Corporation"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000057",
+      "name": "Constance Elmhurst",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/intc-form4#con",
+      "filed_at": "2026-07-18"
+    },
+    {
+      "id": "cik-9990000058",
+      "name": "Darius Windlesham",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/intc-form4#dar",
+      "filed_at": "2026-08-25"
+    },
+    {
+      "id": "cik-9990000056",
+      "name": "Fabian Rookwood-Lee",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/intc-form4#fab",
+      "filed_at": "2026-06-11"
+    }
+  ]
+}

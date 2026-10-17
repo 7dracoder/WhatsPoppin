@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "GM",
+    "name": "General Motors Company"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000020",
+      "name": "Ambrose Tanglethorn",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/gm-form4#tan",
+      "filed_at": "2026-09-13"
+    },
+    {
+      "id": "cik-9990000004",
+      "name": "Percival Pimmswick",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/gm-form4#pim",
+      "filed_at": "2026-07-09"
+    },
+    {
+      "id": "cik-9990000019",
+      "name": "Philippa Merriweather-Fogg",
+      "role": "Chair and Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/gm-form4#mer",
+      "filed_at": "2026-05-05"
+    }
+  ]
+}

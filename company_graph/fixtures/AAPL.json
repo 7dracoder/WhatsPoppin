@@ -1,0 +1,27 @@
+{
+  "company": { "symbol": "AAPL", "name": "Apple Inc.", "industry": "Electronic Computers" },
+  "status": "done",
+  "nodes": [
+    { "symbol": "TSM", "name": "Taiwan Semiconductor Manufacturing Company Limited", "type": "supplier", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "AVGO", "name": "Broadcom Inc.", "type": "supplier", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "QCOM", "name": "QUALCOMM Incorporated", "type": "supplier", "industry": "Radio & TV Broadcasting & Communications Equipment" },
+    { "symbol": "Foxconn", "name": "Hon Hai Precision Industry Co., Ltd.", "type": "partner" },
+    { "symbol": "GOOGL", "name": "Alphabet Inc.", "type": "competitor", "industry": "Services-Computer Programming, Data Processing, Etc." },
+    { "symbol": "MSFT", "name": "Microsoft Corporation", "type": "competitor", "industry": "Services-Prepackaged Software" },
+    { "symbol": "DELL", "name": "Dell Technologies Inc.", "type": "sector_peer", "industry": "Electronic Computers" }
+  ],
+  "links": [
+    { "source": "AAPL", "target": "TSM", "type": "supplier", "summary": "Manufactures custom processors.", "evidence_url": "https://example.com/fixture/sec/aapl-10k#tsmc" },
+    { "source": "AAPL", "target": "AVGO", "type": "supplier", "summary": "Supplies wireless and RF components under a multi-year agreement.", "evidence_url": "https://example.com/fixture/sec/aapl-10k#broadcom" },
+    { "source": "AAPL", "target": "QCOM", "type": "supplier", "summary": "Supplies cellular modems.", "evidence_url": "https://example.com/fixture/sec/aapl-10k#qualcomm" },
+    { "source": "AAPL", "target": "Foxconn", "type": "partner", "summary": "Performs final assembly as an outsourcing partner.", "evidence_url": "https://example.com/fixture/sec/aapl-10k#outsourcing" },
+    { "source": "AAPL", "target": "GOOGL", "type": "competitor", "summary": "Named as a competitor in smartphones and services.", "evidence_url": "https://example.com/fixture/sec/aapl-10k#competition" },
+    { "source": "AAPL", "target": "MSFT", "type": "competitor", "summary": "Named as a competitor in personal computers and software.", "evidence_url": "https://example.com/fixture/sec/aapl-10k#competition" },
+    { "source": "AAPL", "target": "DELL", "type": "sector_peer", "summary": "Same SIC code (3571, electronic computers).", "evidence_url": "https://example.com/fixture/sec/sic-3571" }
+  ],
+  "highlights": [
+    { "target": "TSM", "direction": "may_benefit", "event_type": "product_launch", "reason": "Apple announced a new device line built on a processor TSMC manufactures.", "source_url": "https://example.com/fixture/news/aapl-launch", "event_time": "2026-10-06T17:00:00Z", "price_change_pct": 0.9 },
+    { "target": "QCOM", "direction": "may_face_pressure", "event_type": "product_launch", "reason": "The new device line uses an in-house modem instead of a Qualcomm modem.", "source_url": "https://example.com/fixture/news/aapl-modem", "event_time": "2026-10-06T17:00:00Z", "price_change_pct": -1.4 },
+    { "target": "Foxconn", "direction": "may_benefit", "event_type": "odds_move", "reason": "A prediction market on a new assembly site moved sharply; Foxconn is the named assembly partner.", "source_url": "https://example.com/fixture/markets/aapl-assembly", "event_time": "2026-10-09T12:15:00Z", "price_change_pct": null }
+  ]
+}

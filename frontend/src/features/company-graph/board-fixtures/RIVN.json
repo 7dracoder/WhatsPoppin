@@ -1,0 +1,37 @@
+{
+  "company": {
+    "symbol": "RIVN",
+    "name": "Rivian Automotive, Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000032",
+      "name": "Benedict Wrenfield",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/rivn-form4#ben",
+      "filed_at": "2026-07-11"
+    },
+    {
+      "id": "cik-9990000034",
+      "name": "Cornelius Flaxmere",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/rivn-form4#cor",
+      "filed_at": "2026-09-25"
+    },
+    {
+      "id": "cik-9990000033",
+      "name": "Isolde Pemberthwaite",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/rivn-form4#iso",
+      "filed_at": "2026-08-18"
+    },
+    {
+      "id": "cik-9990000005",
+      "name": "Zenobia Underhollow",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/rivn-form4#zen",
+      "filed_at": "2026-08-14"
+    }
+  ]
+}

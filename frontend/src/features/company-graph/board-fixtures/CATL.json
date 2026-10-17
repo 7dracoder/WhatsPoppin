@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "CATL",
+    "name": "Contemporary Amperex Technology Co., Limited"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000026",
+      "name": "Bartholomew Quince-Larch",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/catl-form4#bar",
+      "filed_at": "2026-06-17"
+    },
+    {
+      "id": "cik-9990000028",
+      "name": "Crispin Hollowell",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/catl-form4#cri",
+      "filed_at": "2026-08-07"
+    },
+    {
+      "id": "cik-9990000027",
+      "name": "Octavia Fernsby",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/catl-form4#oct",
+      "filed_at": "2026-07-24"
+    }
+  ]
+}

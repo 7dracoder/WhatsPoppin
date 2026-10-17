@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "totalResults": 2,
+  "articles": [
+    {
+      "source": {"id": "the-verge", "name": "The Verge"},
+      "author": "Some Reporter",
+      "title": "Nvidia unveils new AI chip as NVDA shares climb",
+      "description": "Nvidia announced a new chip lineup on Tuesday.",
+      "url": "https://www.theverge.com/2026/10/09/nvidia-new-chip",
+      "urlToImage": "https://cdn.theverge.com/image.jpg",
+      "publishedAt": "2026-10-09T14:32:00Z",
+      "content": "Nvidia announced a new chip lineup on Tuesday... [+1500 chars]"
+    },
+    {
+      "source": {"id": null, "name": "Removed Outlet"},
+      "author": null,
+      "title": "[Removed]",
+      "description": null,
+      "url": null,
+      "urlToImage": null,
+      "publishedAt": "2026-10-09T10:00:00Z",
+      "content": null
+    }
+  ]
+}

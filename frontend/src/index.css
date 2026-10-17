@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Theme tokens from new_specs/frontend-design-spec.md.
+  Same token names across every theme — only values change via [data-theme].
+  Status tokens are intentionally NOT redefined per-theme: they stay locked
+  so an alert's meaning never shifts when the user switches themes.
+*/
+:root {
+  --radius-panel: 18px;
+  --radius-control: 9px;
+  --radius-pill: 999px;
+
+  --status-positive: #3dae7a;
+  --status-negative: #d9685f;
+  --status-warning: #cc9a3d;
+  --status-neutral: #8a8f98;
+
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+:root,
+[data-theme="soft-pixel-finance"] {
+  --bg: #f3f8fd;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --panel-gradient-from: #dceafb;
+  --panel-gradient-to: #c7dcf5;
+  --border: #dce6f2;
+  --grid-dot: #a4b1c4;
+  --text-primary: #16213a;
+  --text-secondary: #4b5c78;
+  --text-tertiary: #8694ab;
+  --accent: #3b5bdb;
+  --accent-contrast: #ffffff;
+}
+
+[data-theme="peachy-market"] {
+  --bg: #fbf4ec;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --panel-gradient-from: #ffdcc2;
+  --panel-gradient-to: #ffb088;
+  --border: #f3e2d2;
+  --grid-dot: #c0a692;
+  --text-primary: #3a2416;
+  --text-secondary: #74543f;
+  --text-tertiary: #a4876f;
+  --accent: #e8553e;
+  --accent-contrast: #ffffff;
+}
+
+[data-theme="candy-radar"] {
+  --bg: #ffffff;
+  --surface: #fdfbff;
+  --surface-elevated: #ffffff;
+  --panel-gradient-from: #e3daff;
+  --panel-gradient-to: #cbbdff;
+  --border: #ece4fb;
+  --grid-dot: #b3a9c7;
+  --text-primary: #2a1f3d;
+  --text-secondary: #5f4f7a;
+  --text-tertiary: #9589ab;
+  --accent: #e85d9e;
+  --accent-contrast: #ffffff;
+}
+
+[data-theme="garden-signals"] {
+  --bg: #faf8ee;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --panel-gradient-from: #dcead4;
+  --panel-gradient-to: #bfe0b0;
+  --border: #e6e4d4;
+  --grid-dot: #a6ae92;
+  --text-primary: #223321;
+  --text-secondary: #4d5e49;
+  --text-tertiary: #83916f;
+  --accent: #4c9a5b;
+  --accent-contrast: #ffffff;
+}
+
+[data-theme="pastel-observatory"] {
+  --bg: #f1f0fb;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --border: #e3e1f5;
+  --grid-dot: #a8a5c5;
+  --panel-gradient-from: #d8d4fa;
+  --panel-gradient-to: #c3bcf2;
+  --text-primary: #211f3d;
+  --text-secondary: #4e4a78;
+  --text-tertiary: #8884ab;
+  --accent: #6c63ff;
+  --accent-contrast: #ffffff;
+}
+
+/* Dark mode: systematic transform, same hue family per theme, same status hues raised for contrast. */
+:root[data-mode="dark"],
+[data-theme][data-mode="dark"] {
+  --status-positive: #4fcf94;
+  --status-negative: #ef8176;
+  --status-warning: #e3b45b;
+  --status-neutral: #a7acb6;
+}
+
+[data-theme="soft-pixel-finance"][data-mode="dark"] {
+  --bg: #0d1117;
+  --surface: #151b26;
+  --surface-elevated: #1b2333;
+  --panel-gradient-from: #1a2438;
+  --panel-gradient-to: #202c45;
+  --border: #243044;
+  --grid-dot: #56637d;
+  --text-primary: #eef3fb;
+  --text-secondary: #aab8d1;
+  --text-tertiary: #717f9c;
+  --accent: #6d89f0;
+  --accent-contrast: #0d1117;
+}
+
+[data-theme="peachy-market"][data-mode="dark"] {
+  --bg: #1a120c;
+  --surface: #241810;
+  --surface-elevated: #2d1e14;
+  --panel-gradient-from: #2e1d12;
+  --panel-gradient-to: #3a2516;
+  --border: #3a2a1c;
+  --grid-dot: #765e4a;
+  --text-primary: #fbeee3;
+  --text-secondary: #d2ac92;
+  --text-tertiary: #977a63;
+  --accent: #ff7a5c;
+  --accent-contrast: #1a120c;
+}
+
+[data-theme="candy-radar"][data-mode="dark"] {
+  --bg: #16101f;
+  --surface: #1f1729;
+  --surface-elevated: #271d33;
+  --panel-gradient-from: #27193a;
+  --panel-gradient-to: #321f47;
+  --border: #32253f;
+  --grid-dot: #6d5b80;
+  --text-primary: #f6eefc;
+  --text-secondary: #c6aedb;
+  --text-tertiary: #8d78a3;
+  --accent: #f17bb5;
+  --accent-contrast: #16101f;
+}
+
+[data-theme="garden-signals"][data-mode="dark"] {
+  --bg: #10160e;
+  --surface: #171f14;
+  --surface-elevated: #1e291a;
+  --panel-gradient-from: #19271a;
+  --panel-gradient-to: #203420;
+  --border: #243a24;
+  --grid-dot: #596e52;
+  --text-primary: #edf3e9;
+  --text-secondary: #aec2a3;
+  --text-tertiary: #768a6b;
+  --accent: #6cbc79;
+  --accent-contrast: #10160e;
+}
+
+[data-theme="pastel-observatory"][data-mode="dark"] {
+  --bg: #130f24;
+  --surface: #191331;
+  --surface-elevated: #201a3c;
+  --panel-gradient-from: #211a3e;
+  --panel-gradient-to: #2a2150;
+  --border: #2a2347;
+  --grid-dot: #615b86;
+  --text-primary: #efedfb;
+  --text-secondary: #b9b3e0;
+  --text-tertiary: #7f79a8;
+  --accent: #8d84ff;
+  --accent-contrast: #130f24;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+/*
+ * Recharts makes each chart's SVG keyboard-focusable (for arrow-key tooltips), and
+ * clicking a chart then draws the browser's focus ring around the whole plot.
+ * The ring goes; keyboard users still get the tooltip appearing as their focus cue.
+ */
+.recharts-wrapper:focus,
+.recharts-wrapper :focus,
+.recharts-surface:focus {
+  outline: none;
+}

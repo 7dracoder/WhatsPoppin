@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "DELL",
+    "name": "Dell Technologies Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000049",
+      "name": "Arabella Hazelmere",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/dell-form4#ara",
+      "filed_at": "2026-09-10"
+    },
+    {
+      "id": "cik-9990000047",
+      "name": "Ophelia Dunmarrow",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/dell-form4#oph",
+      "filed_at": "2026-07-20"
+    },
+    {
+      "id": "cik-9990000048",
+      "name": "Tobias Whistledown",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/dell-form4#tob",
+      "filed_at": "2026-08-03"
+    }
+  ]
+}

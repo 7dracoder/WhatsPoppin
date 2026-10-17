@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "Foxconn",
+    "name": "Hon Hai Precision Industry Co., Ltd."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000042",
+      "name": "Caspian Yarrowdale",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/foxconn-form4#cas",
+      "filed_at": "2026-07-09"
+    },
+    {
+      "id": "cik-9990000043",
+      "name": "Dulcibella Northwind",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/foxconn-form4#dul",
+      "filed_at": "2026-08-16"
+    },
+    {
+      "id": "cik-9990000041",
+      "name": "Petronella Glimmerby",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/foxconn-form4#pet",
+      "filed_at": "2026-06-26"
+    }
+  ]
+}

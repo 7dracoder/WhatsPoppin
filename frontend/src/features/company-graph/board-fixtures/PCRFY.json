@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "PCRFY",
+    "name": "Panasonic Holdings Corporation"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000023",
+      "name": "Eudora Thistlewick",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/pcrfy-form4#eud",
+      "filed_at": "2026-08-20"
+    },
+    {
+      "id": "cik-9990000025",
+      "name": "Hyacinth Dovecote",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/pcrfy-form4#hya",
+      "filed_at": "2026-05-10"
+    },
+    {
+      "id": "cik-9990000024",
+      "name": "Lysander Mumbleby",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/pcrfy-form4#lys",
+      "filed_at": "2026-09-03"
+    }
+  ]
+}

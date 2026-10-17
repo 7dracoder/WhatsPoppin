@@ -1,0 +1,37 @@
+{
+  "company": {
+    "symbol": "QCOM",
+    "name": "QUALCOMM Incorporated"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000039",
+      "name": "Lavinia Crumbwell",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/qcom-form4#lav",
+      "filed_at": "2026-09-12"
+    },
+    {
+      "id": "cik-9990000012",
+      "name": "Montague Tugwillow",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/qcom-form4#mon",
+      "filed_at": "2026-08-14"
+    },
+    {
+      "id": "cik-9990000038",
+      "name": "Ozias Finchampton",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/qcom-form4#ozi",
+      "filed_at": "2026-08-05"
+    },
+    {
+      "id": "cik-9990000040",
+      "name": "Rupert Saltmarsh",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/qcom-form4#rup",
+      "filed_at": "2026-05-19"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "map_version": 2,
+  "companies_file": "sp500_top50.json",
+  "categories": {
+    "country": [
+      "United States", "China", "Japan", "Germany", "United Kingdom", "France", "India", "Canada",
+      "South Korea", "Taiwan", "Russia", "Ukraine", "Israel", "Iran", "Saudi Arabia", "Mexico",
+      "Brazil", "Australia", "Italy", "Spain", "Netherlands", "Switzerland", "Turkey", "Indonesia",
+      "Singapore", "Hong Kong", "United Arab Emirates", "Qatar", "Egypt", "South Africa", "Nigeria",
+      "Argentina", "Venezuela", "Chile", "Colombia", "Poland", "Sweden", "Norway", "Denmark",
+      "Belgium", "Ireland", "Vietnam", "Thailand", "Malaysia", "Philippines", "Pakistan",
+      "North Korea", "Iraq", "Kazakhstan", "Greece"
+    ],
+    "sector": [
+      "Semiconductors", "Software", "Cloud Computing", "Artificial Intelligence", "Cybersecurity",
+      "Consumer Electronics", "Telecommunications", "Social Media", "E-commerce", "Retail",
+      "Banking", "Insurance", "Asset Management", "Payments", "Cryptocurrency Industry",
+      "Real Estate", "Homebuilding", "Construction", "Oil and Gas", "Renewable Energy", "Utilities",
+      "Nuclear Power", "Metals and Mining", "Chemicals", "Agriculture", "Food and Beverage",
+      "Restaurants", "Tobacco", "Alcoholic Beverages", "Pharmaceuticals", "Biotechnology",
+      "Medical Devices", "Health Insurance", "Hospitals", "Automotive", "Electric Vehicles",
+      "Airlines", "Aerospace", "Defense", "Shipping", "Railroads", "Trucking and Logistics",
+      "Travel and Hospitality", "Media and Entertainment", "Video Games", "Gambling and Sports Betting",
+      "Professional Sports", "Education", "Space Industry", "Robotics"
+    ],
+    "event": [
+      "Federal Reserve Interest Rate Decision", "US Inflation Report", "US Jobs Report",
+      "US GDP Report", "US Recession", "US Presidential Election", "US Congressional Elections",
+      "US Government Shutdown", "US Debt Ceiling", "US Tariffs", "US-China Trade War",
+      "US Supreme Court Ruling", "US Federal Legislation", "US Tax Policy Change", "Antitrust Case",
+      "Corporate Earnings Report", "Initial Public Offering", "Merger or Acquisition",
+      "Corporate Bankruptcy", "Executive Leadership Change", "Mass Layoffs", "Product Launch",
+      "Product Recall", "FDA Drug Approval", "Stock Market Crash", "Bank Failure",
+      "Russia-Ukraine War", "Middle East Conflict", "Taiwan Strait Tensions", "Economic Sanctions",
+      "OPEC Production Decision", "European Central Bank Rate Decision",
+      "Bank of Japan Policy Decision", "China Economic Stimulus", "Foreign National Election",
+      "Hurricane", "Earthquake", "Wildfire", "Extreme Weather", "Pandemic or Disease Outbreak",
+      "Cyberattack or Data Breach", "Labor Strike", "Crypto Regulation", "AI Regulation",
+      "Climate Policy", "Space Launch", "Super Bowl", "Olympic Games", "FIFA World Cup",
+      "International Summit"
+    ],
+    "resource": [
+      "Crude Oil", "Natural Gas", "Gasoline", "Coal", "Uranium", "Electricity", "Gold", "Silver",
+      "Copper", "Platinum", "Palladium", "Lithium", "Nickel", "Cobalt", "Aluminum", "Iron Ore",
+      "Steel", "Zinc", "Rare Earth Elements", "Graphite", "Wheat", "Corn", "Soybeans", "Coffee",
+      "Cocoa", "Sugar", "Cotton", "Cattle", "Lean Hogs", "Eggs", "Rice", "Orange Juice", "Lumber",
+      "Water", "Fertilizer", "Bitcoin", "Ethereum", "Solana", "XRP", "Stablecoins", "US Dollar",
+      "Euro", "Japanese Yen", "Chinese Yuan", "British Pound", "US Treasury Bonds", "Mortgage Rates",
+      "Helium", "Hydrogen", "Computer Memory Chips"
+    ],
+    "person": [
+      "Donald Trump", "JD Vance", "Joe Biden", "Kamala Harris", "Gavin Newsom", "Marco Rubio",
+      "Scott Bessent", "Howard Lutnick", "Robert F. Kennedy Jr.", "Pete Hegseth", "Mike Johnson",
+      "Chuck Schumer", "Jerome Powell", "Kevin Warsh", "Kevin Hassett", "Christine Lagarde",
+      "Elon Musk", "Jensen Huang", "Tim Cook", "Satya Nadella", "Sundar Pichai", "Mark Zuckerberg",
+      "Jeff Bezos", "Andy Jassy", "Sam Altman", "Dario Amodei", "Lisa Su", "Larry Ellison",
+      "Bill Gates", "Warren Buffett", "Greg Abel", "Jamie Dimon", "Larry Fink", "Ken Griffin",
+      "Bill Ackman", "Cathie Wood", "Michael Saylor", "Brian Armstrong", "Changpeng Zhao",
+      "Masayoshi Son", "Xi Jinping", "Vladimir Putin", "Volodymyr Zelensky", "Benjamin Netanyahu",
+      "Narendra Modi", "Keir Starmer", "Emmanuel Macron", "Friedrich Merz", "Mohammed bin Salman",
+      "Kim Jong Un"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "company": { "symbol": "TSLA", "name": "Tesla, Inc.", "industry": "Motor Vehicles & Passenger Car Bodies" },
+  "status": "done",
+  "nodes": [
+    { "symbol": "PCRFY", "name": "Panasonic Holdings Corporation", "type": "supplier" },
+    { "symbol": "CATL", "name": "Contemporary Amperex Technology Co., Limited", "type": "supplier" },
+    { "symbol": "NVDA", "name": "NVIDIA Corporation", "type": "supplier", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "ALB", "name": "Albemarle Corporation", "type": "supplier", "industry": "Plastic Materials, Synth Resins & Nonvulcan Elastomers" },
+    { "symbol": "GM", "name": "General Motors Company", "type": "competitor", "industry": "Motor Vehicles & Passenger Car Bodies" },
+    { "symbol": "F", "name": "Ford Motor Company", "type": "competitor", "industry": "Motor Vehicles & Passenger Car Bodies" },
+    { "symbol": "RIVN", "name": "Rivian Automotive, Inc.", "type": "sector_peer", "industry": "Motor Vehicles & Passenger Car Bodies" },
+    { "symbol": "LCID", "name": "Lucid Group, Inc.", "type": "sector_peer", "industry": "Motor Vehicles & Passenger Car Bodies" }
+  ],
+  "links": [
+    { "source": "TSLA", "target": "PCRFY", "type": "supplier", "summary": "Supplies lithium-ion battery cells under a long-term agreement.", "evidence_url": "https://example.com/fixture/sec/tsla-10k#panasonic" },
+    { "source": "TSLA", "target": "CATL", "type": "supplier", "summary": "Supplies LFP battery cells for some vehicle lines.", "evidence_url": "https://example.com/fixture/sec/tsla-10k#catl" },
+    { "source": "TSLA", "target": "NVDA", "type": "supplier", "summary": "Supplies GPUs used for training compute.", "evidence_url": "https://example.com/fixture/sec/tsla-10k#nvidia" },
+    { "source": "TSLA", "target": "ALB", "type": "supplier", "summary": "Supplies lithium hydroxide under a supply agreement.", "evidence_url": "https://example.com/fixture/sec/tsla-10k#albemarle" },
+    { "source": "TSLA", "target": "GM", "type": "competitor", "summary": "Named as a competitor in electric vehicles.", "evidence_url": "https://example.com/fixture/sec/tsla-10k#competition" },
+    { "source": "TSLA", "target": "F", "type": "competitor", "summary": "Named as a competitor in electric vehicles.", "evidence_url": "https://example.com/fixture/sec/tsla-10k#competition" },
+    { "source": "TSLA", "target": "RIVN", "type": "sector_peer", "summary": "Same SIC code (3711, motor vehicles and passenger car bodies).", "evidence_url": "https://example.com/fixture/sec/sic-3711" },
+    { "source": "TSLA", "target": "LCID", "type": "sector_peer", "summary": "Same SIC code (3711, motor vehicles and passenger car bodies).", "evidence_url": "https://example.com/fixture/sec/sic-3711" }
+  ],
+  "highlights": [
+    { "target": "PCRFY", "direction": "may_benefit", "event_type": "contract", "reason": "Tesla announced an expanded battery cell order; Panasonic is a named cell supplier.", "source_url": "https://example.com/fixture/news/tsla-cell-order", "event_time": "2026-10-08T14:30:00Z", "price_change_pct": 1.8 },
+    { "target": "GM", "direction": "may_face_pressure", "event_type": "product_launch", "reason": "Tesla launched a lower-priced model in a segment where GM sells a competing EV.", "source_url": "https://example.com/fixture/news/tsla-new-model", "event_time": "2026-10-07T09:00:00Z", "price_change_pct": null }
+  ]
+}

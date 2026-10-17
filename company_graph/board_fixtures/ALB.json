@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "ALB",
+    "name": "Albemarle Corporation"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000030",
+      "name": "Alaric Puddlecombe",
+      "role": "Chair of the Board",
+      "evidence_url": "https://example.com/fixture/sec/alb-form4#ala",
+      "filed_at": "2026-05-21"
+    },
+    {
+      "id": "cik-9990000031",
+      "name": "Theodora Mossgrove",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/alb-form4#the",
+      "filed_at": "2026-06-04"
+    },
+    {
+      "id": "cik-9990000029",
+      "name": "Winifred Stargazey",
+      "role": "Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/alb-form4#win",
+      "filed_at": "2026-09-14"
+    }
+  ]
+}

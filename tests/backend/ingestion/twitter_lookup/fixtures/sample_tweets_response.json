@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": "1234567890",
+      "text": "Nvidia just announced a new AI chip, $NVDA to the moon #nvidia",
+      "created_at": "2026-10-10T14:32:00.000Z",
+      "author_id": "999",
+      "public_metrics": {
+        "retweet_count": 120,
+        "reply_count": 30,
+        "like_count": 500,
+        "quote_count": 10
+      }
+    },
+    {
+      "id": "1234567891",
+      "text": "",
+      "created_at": "2026-10-10T14:35:00.000Z",
+      "author_id": "999",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0
+      }
+    }
+  ],
+  "includes": {
+    "users": [
+      {"id": "999", "username": "realDonaldTrump"}
+    ]
+  }
+}

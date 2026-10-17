@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "F",
+    "name": "Ford Motor Company"
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000020",
+      "name": "Ambrose Tanglethorn",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/f-form4#tan",
+      "filed_at": "2026-08-13"
+    },
+    {
+      "id": "cik-9990000022",
+      "name": "Cuthbert Kestrelby",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/f-form4#kes",
+      "filed_at": "2026-06-09"
+    },
+    {
+      "id": "cik-9990000021",
+      "name": "Rosalind Ivybridge",
+      "role": "Executive Chair",
+      "evidence_url": "https://example.com/fixture/sec/f-form4#ivy",
+      "filed_at": "2026-04-05"
+    }
+  ]
+}

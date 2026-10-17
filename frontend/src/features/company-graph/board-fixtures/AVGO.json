@@ -1,0 +1,30 @@
+{
+  "company": {
+    "symbol": "AVGO",
+    "name": "Broadcom Inc."
+  },
+  "status": "done",
+  "members": [
+    {
+      "id": "cik-9990000017",
+      "name": "Cordelia Blythewick",
+      "role": "President and Chief Executive Officer",
+      "evidence_url": "https://example.com/fixture/sec/avgo-form4#bly",
+      "filed_at": "2026-07-05"
+    },
+    {
+      "id": "cik-9990000018",
+      "name": "Fitzwilliam Oakenshade",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/avgo-form4#oak",
+      "filed_at": "2026-04-13"
+    },
+    {
+      "id": "cik-9990000008",
+      "name": "Ignatius Crowmarsh",
+      "role": "Director",
+      "evidence_url": "https://example.com/fixture/sec/avgo-form4#cro",
+      "filed_at": "2026-09-09"
+    }
+  ]
+}

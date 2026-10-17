@@ -1,0 +1,23 @@
+{
+  "company": { "symbol": "NVDA", "name": "NVIDIA Corporation", "industry": "Semiconductors & Related Devices" },
+  "status": "done",
+  "nodes": [
+    { "symbol": "TSM", "name": "Taiwan Semiconductor Manufacturing Company Limited", "type": "supplier", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "MU", "name": "Micron Technology, Inc.", "type": "supplier", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "MSFT", "name": "Microsoft Corporation", "type": "customer", "industry": "Services-Prepackaged Software" },
+    { "symbol": "AMD", "name": "Advanced Micro Devices, Inc.", "type": "competitor", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "INTC", "name": "Intel Corporation", "type": "competitor", "industry": "Semiconductors & Related Devices" },
+    { "symbol": "AVGO", "name": "Broadcom Inc.", "type": "sector_peer", "industry": "Semiconductors & Related Devices" }
+  ],
+  "links": [
+    { "source": "NVDA", "target": "TSM", "type": "supplier", "summary": "Manufactures GPUs as a foundry partner.", "evidence_url": "https://example.com/fixture/sec/nvda-10k#foundry" },
+    { "source": "NVDA", "target": "MU", "type": "supplier", "summary": "Supplies high-bandwidth memory.", "evidence_url": "https://example.com/fixture/sec/nvda-10k#memory" },
+    { "source": "NVDA", "target": "MSFT", "type": "customer", "summary": "A cloud provider that buys data center products.", "evidence_url": "https://example.com/fixture/sec/nvda-10k#customers" },
+    { "source": "NVDA", "target": "AMD", "type": "competitor", "summary": "Named as a competitor in GPUs and data center processors.", "evidence_url": "https://example.com/fixture/sec/nvda-10k#competition" },
+    { "source": "NVDA", "target": "INTC", "type": "competitor", "summary": "Named as a competitor in data center processors.", "evidence_url": "https://example.com/fixture/sec/nvda-10k#competition" },
+    { "source": "NVDA", "target": "AVGO", "type": "sector_peer", "summary": "Same SIC code (3674, semiconductors and related devices).", "evidence_url": "https://example.com/fixture/sec/sic-3674" }
+  ],
+  "highlights": [
+    { "target": "MU", "direction": "may_benefit", "event_type": "earnings_surprise", "reason": "NVIDIA reported data center revenue above estimates; Micron supplies its high-bandwidth memory.", "source_url": "https://example.com/fixture/news/nvda-earnings", "event_time": "2026-10-05T20:10:00Z", "price_change_pct": 2.6 }
+  ]
+}

@@ -1,0 +1,738 @@
+[
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "aliases": [
+      "Apple",
+      "iPhone maker Apple"
+    ]
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "aliases": [
+      "Microsoft"
+    ]
+  },
+  {
+    "symbol": "NVDA",
+    "name": "NVIDIA Corporation",
+    "aliases": [
+      "Nvidia",
+      "Nvidia Corporation"
+    ]
+  },
+  {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc.",
+    "aliases": [
+      "Google",
+      "Alphabet"
+    ]
+  },
+  {
+    "symbol": "AMZN",
+    "name": "Amazon.com, Inc.",
+    "aliases": [
+      "Amazon"
+    ]
+  },
+  {
+    "symbol": "META",
+    "name": "Meta Platforms, Inc.",
+    "aliases": [
+      "Meta",
+      "Facebook"
+    ]
+  },
+  {
+    "symbol": "BRK.B",
+    "name": "Berkshire Hathaway Inc.",
+    "aliases": [
+      "Berkshire Hathaway",
+      "Berkshire"
+    ]
+  },
+  {
+    "symbol": "AVGO",
+    "name": "Broadcom Inc.",
+    "aliases": [
+      "Broadcom"
+    ]
+  },
+  {
+    "symbol": "TSLA",
+    "name": "Tesla, Inc.",
+    "aliases": [
+      "Tesla"
+    ]
+  },
+  {
+    "symbol": "LLY",
+    "name": "Eli Lilly and Company",
+    "aliases": [
+      "Eli Lilly",
+      "Lilly"
+    ]
+  },
+  {
+    "symbol": "JPM",
+    "name": "JPMorgan Chase & Co.",
+    "aliases": [
+      "JPMorgan",
+      "JPMorgan Chase",
+      "JP Morgan",
+      "Chase"
+    ]
+  },
+  {
+    "symbol": "V",
+    "name": "Visa Inc.",
+    "aliases": [
+      "Visa"
+    ]
+  },
+  {
+    "symbol": "UNH",
+    "name": "UnitedHealth Group Incorporated",
+    "aliases": [
+      "UnitedHealth",
+      "UnitedHealth Group"
+    ]
+  },
+  {
+    "symbol": "WMT",
+    "name": "Walmart Inc.",
+    "aliases": [
+      "Walmart"
+    ]
+  },
+  {
+    "symbol": "JNJ",
+    "name": "Johnson & Johnson",
+    "aliases": [
+      "Johnson & Johnson",
+      "J&J"
+    ]
+  },
+  {
+    "symbol": "MA",
+    "name": "Mastercard Incorporated",
+    "aliases": [
+      "Mastercard"
+    ]
+  },
+  {
+    "symbol": "XOM",
+    "name": "Exxon Mobil Corporation",
+    "aliases": [
+      "Exxon",
+      "Exxon Mobil",
+      "ExxonMobil"
+    ]
+  },
+  {
+    "symbol": "PG",
+    "name": "Procter & Gamble Company",
+    "aliases": [
+      "Procter & Gamble",
+      "P&G"
+    ]
+  },
+  {
+    "symbol": "COST",
+    "name": "Costco Wholesale Corporation",
+    "aliases": [
+      "Costco"
+    ]
+  },
+  {
+    "symbol": "HD",
+    "name": "The Home Depot, Inc.",
+    "aliases": [
+      "Home Depot"
+    ]
+  },
+  {
+    "symbol": "ORCL",
+    "name": "Oracle Corporation",
+    "aliases": [
+      "Oracle"
+    ]
+  },
+  {
+    "symbol": "NFLX",
+    "name": "Netflix, Inc.",
+    "aliases": [
+      "Netflix"
+    ]
+  },
+  {
+    "symbol": "BAC",
+    "name": "Bank of America Corporation",
+    "aliases": [
+      "Bank of America",
+      "BofA"
+    ]
+  },
+  {
+    "symbol": "ABBV",
+    "name": "AbbVie Inc.",
+    "aliases": [
+      "AbbVie"
+    ]
+  },
+  {
+    "symbol": "CVX",
+    "name": "Chevron Corporation",
+    "aliases": [
+      "Chevron"
+    ]
+  },
+  {
+    "symbol": "MRK",
+    "name": "Merck & Co., Inc.",
+    "aliases": [
+      "Merck"
+    ]
+  },
+  {
+    "symbol": "KO",
+    "name": "The Coca-Cola Company",
+    "aliases": [
+      "Coca-Cola",
+      "Coke"
+    ]
+  },
+  {
+    "symbol": "AMD",
+    "name": "Advanced Micro Devices, Inc.",
+    "aliases": [
+      "AMD",
+      "Advanced Micro Devices"
+    ]
+  },
+  {
+    "symbol": "CRM",
+    "name": "Salesforce, Inc.",
+    "aliases": [
+      "Salesforce"
+    ]
+  },
+  {
+    "symbol": "PEP",
+    "name": "PepsiCo, Inc.",
+    "aliases": [
+      "PepsiCo",
+      "Pepsi"
+    ]
+  },
+  {
+    "symbol": "ADBE",
+    "name": "Adobe Inc.",
+    "aliases": [
+      "Adobe"
+    ]
+  },
+  {
+    "symbol": "TMO",
+    "name": "Thermo Fisher Scientific Inc.",
+    "aliases": [
+      "Thermo Fisher",
+      "Thermo Fisher Scientific"
+    ]
+  },
+  {
+    "symbol": "MCD",
+    "name": "McDonald's Corporation",
+    "aliases": [
+      "McDonald's",
+      "McDonalds"
+    ]
+  },
+  {
+    "symbol": "CSCO",
+    "name": "Cisco Systems, Inc.",
+    "aliases": [
+      "Cisco"
+    ]
+  },
+  {
+    "symbol": "ABT",
+    "name": "Abbott Laboratories",
+    "aliases": [
+      "Abbott"
+    ]
+  },
+  {
+    "symbol": "WFC",
+    "name": "Wells Fargo & Company",
+    "aliases": [
+      "Wells Fargo"
+    ]
+  },
+  {
+    "symbol": "ACN",
+    "name": "Accenture plc",
+    "aliases": [
+      "Accenture"
+    ]
+  },
+  {
+    "symbol": "LIN",
+    "name": "Linde plc",
+    "aliases": [
+      "Linde"
+    ]
+  },
+  {
+    "symbol": "DHR",
+    "name": "Danaher Corporation",
+    "aliases": [
+      "Danaher"
+    ]
+  },
+  {
+    "symbol": "TXN",
+    "name": "Texas Instruments Incorporated",
+    "aliases": [
+      "Texas Instruments"
+    ]
+  },
+  {
+    "symbol": "PM",
+    "name": "Philip Morris International Inc.",
+    "aliases": [
+      "Philip Morris",
+      "Philip Morris International"
+    ]
+  },
+  {
+    "symbol": "VZ",
+    "name": "Verizon Communications Inc.",
+    "aliases": [
+      "Verizon"
+    ]
+  },
+  {
+    "symbol": "IBM",
+    "name": "International Business Machines Corporation",
+    "aliases": [
+      "IBM"
+    ]
+  },
+  {
+    "symbol": "CMCSA",
+    "name": "Comcast Corporation",
+    "aliases": [
+      "Comcast"
+    ]
+  },
+  {
+    "symbol": "PFE",
+    "name": "Pfizer Inc.",
+    "aliases": [
+      "Pfizer"
+    ]
+  },
+  {
+    "symbol": "AXP",
+    "name": "American Express Company",
+    "aliases": [
+      "American Express",
+      "Amex"
+    ]
+  },
+  {
+    "symbol": "HON",
+    "name": "Honeywell International Inc.",
+    "aliases": [
+      "Honeywell"
+    ]
+  },
+  {
+    "symbol": "UNP",
+    "name": "Union Pacific Corporation",
+    "aliases": [
+      "Union Pacific"
+    ]
+  },
+  {
+    "symbol": "GS",
+    "name": "The Goldman Sachs Group, Inc.",
+    "aliases": [
+      "Goldman Sachs",
+      "Goldman"
+    ]
+  },
+  {
+    "symbol": "QCOM",
+    "name": "QUALCOMM Incorporated",
+    "aliases": [
+      "Qualcomm"
+    ]
+  },
+  {
+    "symbol": "PLTR",
+    "name": "Palantir Technologies Inc.",
+    "aliases": [
+      "Palantir"
+    ]
+  },
+  {
+    "symbol": "UBER",
+    "name": "Uber Technologies, Inc.",
+    "aliases": [
+      "Uber"
+    ]
+  },
+  {
+    "symbol": "DIS",
+    "name": "The Walt Disney Company",
+    "aliases": [
+      "Disney",
+      "Walt Disney"
+    ]
+  },
+  {
+    "symbol": "F",
+    "name": "Ford Motor Company",
+    "aliases": [
+      "Ford",
+      "Ford Motor"
+    ]
+  },
+  {
+    "symbol": "DAL",
+    "name": "Delta Air Lines, Inc.",
+    "aliases": [
+      "Delta Air Lines",
+      "Delta Airlines"
+    ]
+  },
+  {
+    "symbol": "INTC",
+    "name": "Intel Corporation",
+    "aliases": [
+      "Intel"
+    ]
+  },
+  {
+    "symbol": "MU",
+    "name": "Micron Technology, Inc.",
+    "aliases": [
+      "Micron"
+    ]
+  },
+  {
+    "symbol": "TSM",
+    "name": "Taiwan Semiconductor Manufacturing Company",
+    "aliases": [
+      "TSMC",
+      "Taiwan Semiconductor"
+    ]
+  },
+  {
+    "symbol": "ASML",
+    "name": "ASML Holding N.V.",
+    "aliases": [
+      "ASML"
+    ]
+  },
+  {
+    "symbol": "AMAT",
+    "name": "Applied Materials, Inc.",
+    "aliases": [
+      "Applied Materials"
+    ]
+  },
+  {
+    "symbol": "LRCX",
+    "name": "Lam Research Corporation",
+    "aliases": [
+      "Lam Research"
+    ]
+  },
+  {
+    "symbol": "KLAC",
+    "name": "KLA Corporation",
+    "aliases": [
+      "KLA"
+    ]
+  },
+  {
+    "symbol": "ARM",
+    "name": "Arm Holdings plc",
+    "aliases": [
+      "Arm",
+      "Arm Holdings"
+    ]
+  },
+  {
+    "symbol": "ADI",
+    "name": "Analog Devices, Inc.",
+    "aliases": [
+      "Analog Devices"
+    ]
+  },
+  {
+    "symbol": "NXPI",
+    "name": "NXP Semiconductors N.V.",
+    "aliases": [
+      "NXP"
+    ]
+  },
+  {
+    "symbol": "DELL",
+    "name": "Dell Technologies Inc.",
+    "aliases": [
+      "Dell"
+    ]
+  },
+  {
+    "symbol": "SMCI",
+    "name": "Super Micro Computer, Inc.",
+    "aliases": [
+      "Supermicro",
+      "Super Micro"
+    ]
+  },
+  {
+    "symbol": "CRWV",
+    "name": "CoreWeave, Inc.",
+    "aliases": [
+      "CoreWeave"
+    ]
+  },
+  {
+    "symbol": "NBIS",
+    "name": "Nebius Group N.V.",
+    "aliases": [
+      "Nebius"
+    ]
+  },
+  {
+    "symbol": "COIN",
+    "name": "Coinbase Global, Inc.",
+    "aliases": [
+      "Coinbase"
+    ]
+  },
+  {
+    "symbol": "PANW",
+    "name": "Palo Alto Networks, Inc.",
+    "aliases": [
+      "Palo Alto Networks"
+    ]
+  },
+  {
+    "symbol": "CRWD",
+    "name": "CrowdStrike Holdings, Inc.",
+    "aliases": [
+      "CrowdStrike"
+    ]
+  },
+  {
+    "symbol": "NET",
+    "name": "Cloudflare, Inc.",
+    "aliases": [
+      "Cloudflare"
+    ]
+  },
+  {
+    "symbol": "CDNS",
+    "name": "Cadence Design Systems, Inc.",
+    "aliases": [
+      "Cadence"
+    ]
+  },
+  {
+    "symbol": "SHOP",
+    "name": "Shopify Inc.",
+    "aliases": [
+      "Shopify"
+    ]
+  },
+  {
+    "symbol": "SPOT",
+    "name": "Spotify Technology S.A.",
+    "aliases": [
+      "Spotify"
+    ]
+  },
+  {
+    "symbol": "BABA",
+    "name": "Alibaba Group Holding Limited",
+    "aliases": [
+      "Alibaba"
+    ]
+  },
+  {
+    "symbol": "BIDU",
+    "name": "Baidu, Inc.",
+    "aliases": [
+      "Baidu"
+    ]
+  },
+  {
+    "symbol": "NIO",
+    "name": "NIO Inc.",
+    "aliases": [
+      "NIO"
+    ]
+  },
+  {
+    "symbol": "XPEV",
+    "name": "XPeng Inc.",
+    "aliases": [
+      "XPeng"
+    ]
+  },
+  {
+    "symbol": "LI",
+    "name": "Li Auto Inc.",
+    "aliases": [
+      "Li Auto"
+    ]
+  },
+  {
+    "symbol": "GM",
+    "name": "General Motors Company",
+    "aliases": [
+      "General Motors",
+      "GM"
+    ]
+  },
+  {
+    "symbol": "TM",
+    "name": "Toyota Motor Corporation",
+    "aliases": [
+      "Toyota"
+    ]
+  },
+  {
+    "symbol": "HMC",
+    "name": "Honda Motor Co., Ltd.",
+    "aliases": [
+      "Honda"
+    ]
+  },
+  {
+    "symbol": "STLA",
+    "name": "Stellantis N.V.",
+    "aliases": [
+      "Stellantis",
+      "Chrysler",
+      "Jeep"
+    ]
+  },
+  {
+    "symbol": "RACE",
+    "name": "Ferrari N.V.",
+    "aliases": [
+      "Ferrari"
+    ]
+  },
+  {
+    "symbol": "RIVN",
+    "name": "Rivian Automotive, Inc.",
+    "aliases": [
+      "Rivian"
+    ]
+  },
+  {
+    "symbol": "SNDK",
+    "name": "Sandisk Corporation",
+    "aliases": [
+      "Sandisk",
+      "SanDisk"
+    ]
+  },
+  {
+    "symbol": "STX",
+    "name": "Seagate Technology Holdings plc",
+    "aliases": [
+      "Seagate"
+    ]
+  },
+  {
+    "symbol": "GFS",
+    "name": "GlobalFoundries Inc.",
+    "aliases": [
+      "GlobalFoundries"
+    ]
+  },
+  {
+    "symbol": "JBL",
+    "name": "Jabil Inc.",
+    "aliases": [
+      "Jabil"
+    ]
+  },
+  {
+    "symbol": "FTNT",
+    "name": "Fortinet, Inc.",
+    "aliases": [
+      "Fortinet"
+    ]
+  },
+  {
+    "symbol": "NVO",
+    "name": "Novo Nordisk A/S",
+    "aliases": [
+      "Novo Nordisk",
+      "Ozempic maker"
+    ]
+  },
+  {
+    "symbol": "AZN",
+    "name": "AstraZeneca PLC",
+    "aliases": [
+      "AstraZeneca"
+    ]
+  },
+  {
+    "symbol": "NVS",
+    "name": "Novartis AG",
+    "aliases": [
+      "Novartis"
+    ]
+  },
+  {
+    "symbol": "SHEL",
+    "name": "Shell plc",
+    "aliases": [
+      "Shell"
+    ]
+  },
+  {
+    "symbol": "NEE",
+    "name": "NextEra Energy, Inc.",
+    "aliases": [
+      "NextEra",
+      "NextEra Energy"
+    ]
+  },
+  {
+    "symbol": "CEG",
+    "name": "Constellation Energy Corporation",
+    "aliases": [
+      "Constellation Energy"
+    ]
+  },
+  {
+    "symbol": "C",
+    "name": "Citigroup Inc.",
+    "aliases": [
+      "Citigroup",
+      "Citi"
+    ]
+  },
+  {
+    "symbol": "COF",
+    "name": "Capital One Financial Corporation",
+    "aliases": [
+      "Capital One"
+    ]
+  }
+]
