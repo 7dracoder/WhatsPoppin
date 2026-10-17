@@ -37,6 +37,7 @@ risks that hit stocks. But using it today means:
 | **Ask the evidence** | Run questions over the evidence you collected, e.g. *"what % of these are about supply-chain risk?"* |
 | **Live alerts** | A detector scores every market every second against its own history (price z-score, volume bursts, whale orders, order-flow imbalance) and raises an alert only on real moves. Each alert is matched to the companies it may affect, and their nodes pulse on the graph. |
 | **Projects** | Save an analysis (graph, markets, evidence, range) and reopen it later. |
+| **Poppy, the voice assistant** | Click the speaker button next to the theme dots and talk to the app. Poppy sees what's on screen and can drive it: open a company's graph, find and pick markets, open the chart, change the range, theme or mode, open alerts, and answer questions about what it shows. Hands-free mode keeps the conversation going, and narration reads out what just loaded. It stays on as you move between pages. |
 
 ### Walkthrough
 
@@ -47,6 +48,10 @@ risks that hit stocks. But using it today means:
 | 3. Stock vs. market odds, with evidence |
 |---|
 | ![Price vs odds](docs/screenshots/04-price-vs-odds.png) |
+
+| 4. "Show me Nvidia, please" (spoken) | 5. "What does the chart show?" |
+|---|---|
+| ![Voice assistant builds the graph](docs/screenshots/06-voice-graph.png) | ![Voice assistant explains the chart](docs/screenshots/07-voice-chart.png) |
 
 ---
 
@@ -86,10 +91,13 @@ flowchart LR
         R4[/evidence · twitter · stocks/]
         R5[/classification/]
         R6[/alerts · projects/]
+        R7[/assistant/]
         CG[Company graph builder<br/>links · highlights · boards]
     end
 
-    UI[React app<br/>graph · chart · evidence]
+    UI[React app<br/>graph · chart · evidence<br/>voice assistant]
+    EL[ElevenLabs<br/>speech-to-text · text-to-speech]
+    TR[(PRISM run traces)]
 
     K --> ING
     P --> ING
@@ -116,6 +124,10 @@ flowchart LR
     DB --> R6
     DB --> R1
     UI <--> API
+    R7[/assistant/] --> EL
+    R7 --> LLM
+    R7 --> TR
+    R3 --> TR
 ```
 
 ### How data flows
@@ -201,6 +213,57 @@ Most of the tags v2 misses are second-order, like `Pete Hegseth` on a ceasefire
 market or `Oil and Gas` on an airspace closure. Set `ENRICH_SHORTLIST=0` to go
 back to the full walk.
 
+### Voice assistant (Poppy)
+
+One spoken turn runs through three backend routes. The ElevenLabs key never reaches the browser.
+
+```mermaid
+sequenceDiagram
+    participant U as You
+    participant B as Browser (AssistantProvider)
+    participant A as FastAPI /assistant
+    participant E as ElevenLabs
+    participant N as Nicrron (nicrron/auto)
+    U->>B: speak (mic, silence detection ends the turn)
+    B->>A: POST /assistant/transcribe (audio)
+    A->>E: Scribe speech-to-text
+    E-->>B: "show me nvidia"
+    B->>A: POST /assistant/ask (words + snapshot of the screen)
+    A->>N: system prompt + screen context + history
+    N-->>B: {reply, actions: [search_company NVDA]}
+    B->>B: run actions (dispatch to the workspace / panels)
+    B->>A: POST /assistant/speak (reply)
+    A->>E: text-to-speech (Flash v2.5)
+    E-->>U: audio reply, then (hands-free) listen again
+```
+
+- **What Poppy sees:** a JSON snapshot of the screen, built fresh for every question:
+  - the stage and the company,
+  - linked companies and their relationship,
+  - recent events and board members,
+  - the numbered market list, selected markets and live alerts,
+  - the chart's start/end prices and odds and its correlation readout,
+  - the pinned evidence with sentiment,
+  - the theme.
+- **What Poppy can do:** a fixed list of actions, checked against a schema on the server: `search_company`, `search_markets`, `select_market`, `generate_chart`, `back_to_graph`, `set_range`, `set_theme`, `set_mode`, `go_home`, `open_alerts`, `stop_listening`. Panels own their actions through a small command bus (`features/assistant/assistantBus.ts`).
+- **Modes:**
+  - **Hands-free:** listens again after every reply.
+  - **Narration:** speaks when a graph finishes or a chart opens.
+  - **Alt+V:** talk/stop from anywhere.
+  - **Typing:** you can type instead of speaking.
+- **Guardrail:** Poppy gives information, not advice. It won't recommend trades, predict prices or promise returns, and it only names companies, markets and numbers that are on screen.
+
+### Run tracing (PRISM)
+
+Every assistant turn and market search is recorded as a **run** with timed **steps**, by `backend/observability/prism.py`:
+
+| Run | Steps |
+|---|---|
+| `assistant.turn` | `context.snapshot` (retrieval) → `llm.complete_structured` (model) → one `action.*` per UI action |
+| `markets.search` | `embeddings.search` (retrieval) → `venue.activity_filter` (tool) |
+
+Each step records its input, output, duration and status. A failing step marks the run failed, with the error type and message, which is what failure clusters group on. Runs are appended to `.cache/prism/runs.jsonl`. With `PRISM_INGEST_URL` set, they are also posted there with `PRISM_API_KEY` on a background thread, so tracing never slows a request down.
+
 **Grounding rules:** every graph link and highlight must carry a source URL from
 a real fetch in that run. Nothing is saved from model memory, and no wording
 predicts a price or suggests a trade.
@@ -213,7 +276,8 @@ predicts a price or suggests a trade.
 |---|---|
 | Backend | Python 3.11+, FastAPI, SQLAlchemy 2 (async) + asyncpg, httpx, Pydantic 2, NumPy, `uv` |
 | Database | PostgreSQL (tables created from the models; no migrations) |
-| Frontend | React 18, TypeScript, Vite, Tailwind, Radix Themes, Motion, react-force-graph-2d, Recharts |
+| Frontend | React 18, TypeScript, Vite, Tailwind, Radix Themes, Motion, react-force-graph-2d, Recharts, Web Audio + MediaRecorder |
+| Voice | ElevenLabs Scribe (speech-to-text) and Flash v2.5 (text-to-speech), proxied by the backend |
 | AI | Nicrron gateway: `nicrron/auto` for reasoning, `voyage/voyage-finance-2` for embeddings; optional TypeSafe Jev, Anthropic |
 | Data | Kalshi, Polymarket (global + US), SEC EDGAR, NewsAPI, X API, Alpaca |
 | Tests | pytest (650+ tests), Vitest (120+ tests) |
@@ -223,7 +287,7 @@ predicts a price or suggests a trade.
 ```
 backend/
   main.py              FastAPI app: CORS, error handling, routers
-  api/                 REST routes (graph, entities, markets, evidence, classification, alerts, projects…)
+  api/                 REST routes (graph, entities, markets, evidence, classification, alerts, projects, assistant…)
   ingestion/           kalshi/, polymarket/, polymarket_us/, alpaca/, news_api/, twitter_lookup/, common/
   enrichment/          market → company tagging worker + search queries
   alert_impact/        alert → affected companies worker (tiers 1–3)
@@ -231,12 +295,14 @@ backend/
   llm/                 Nicrron client: structured output (client.py) + embeddings (embeddings.py)
   entities/            entity map (companies, sectors, themes) + matcher
   evidence/            news fetch + cache
+  observability/       run tracing (PRISM): runs with timed steps
   models/              SQLAlchemy models, one per table
 alert_detector/        live signal detector (signals.py = pure maths)
 baselines/             per-market "normal" computed from history
 company_graph/         SEC client, filing trimmer, relationship extractor, links, highlights, boards
 frontend/src/
   features/workspace/  graph, markets panel, market view (chart, evidence), alerts, projects
+  features/assistant/  Poppy: provider (voice loop), recorder (silence detection), dock, command bus
   lib/                 API client, chart maths (alignment, correlation, lead/lag)
 new_specs/             design specs per feature
 mock_db_design/        database design
@@ -299,6 +365,9 @@ uv run python -m backend.alert_impact           # alert → affected companies
 | `POLYMARKET_US_KEY_ID` / `_SECRET_KEY` | Polymarket US stream | polymarket.us/developer | Global Polymarket needs no key |
 | `TYPESAFE_API_KEY` | Optional: native Jev model for classification | typesafe.ai | Classifier runs on Nicrron |
 | `NICRRON_EMBED_MODEL` | Optional: embedding model | — | `voyage/voyage-finance-2` |
+| `ELEVENLABS_API_KEY` | Voice assistant: speech-to-text + text-to-speech | [elevenlabs.io](https://elevenlabs.io) | Voice off; the typed assistant still works |
+| `ELEVENLABS_VOICE_ID` | Optional: Poppy's voice | ElevenLabs voice library | "Matilda" |
+| `PRISM_API_KEY` + `PRISM_INGEST_URL` | Optional: export run traces | PRISM | Runs are still logged locally |
 
 All tuning knobs (alert thresholds, cache TTLs, daily API budgets) are
 documented in [`.env.example`](.env.example).
@@ -315,6 +384,7 @@ documented in [`.env.example`](.env.example).
 | `GET /markets/{id}/history?stock=&range=` | Market odds + stock bars on the same interval |
 | `GET /evidence/news` · `GET /twitter/search` | Candidate evidence items |
 | `POST /classification/sentiment` · `/query` | Per-item sentiment · % of evidence answering a question |
+| `POST /assistant/transcribe` · `/ask` · `/speak` | Voice assistant: audio → words · words + screen → reply + actions · reply → MP3 |
 | `GET /alerts/recent` · `/entities/{company}/alerts` | Live alerts with affected companies |
 | `GET/POST/PUT/DELETE /projects` | Saved analyses |
 

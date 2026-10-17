@@ -1,28 +1,25 @@
 import type { MarketSource } from "../../../types/predictionMarket";
+import kalshiLogo from "../../../assets/logos/kalshi.png";
+import polymarketLogo from "../../../assets/logos/polymarket.png";
 
-// Placeholder lettermarks in each venue's brand color. Swap SourceMark's
-// contents for the official logo assets from Kalshi's and Polymarket's brand
-// kits before shipping.
-const SOURCE_MARKS: Record<
-  MarketSource,
-  { letter: string; bg: string; fg: string; name: string }
-> = {
-  kalshi: { letter: "K", bg: "#28CC95", fg: "#04261b", name: "Kalshi" },
-  polymarket: { letter: "P", bg: "#2E5CFF", fg: "#ffffff", name: "Polymarket" },
+// The venues' own app icons (Kalshi's green "K", Polymarket's blue mark), both square and
+// full-bleed at 128x128, so one frame renders them at exactly the same size everywhere.
+const SOURCE_MARKS: Record<MarketSource, { src: string; name: string }> = {
+  kalshi: { src: kalshiLogo, name: "Kalshi" },
+  polymarket: { src: polymarketLogo, name: "Polymarket" },
 };
 
-
 export function SourceMark({ source }: { source: MarketSource }) {
-  const { letter, bg, fg, name } = SOURCE_MARKS[source];
+  const { src, name } = SOURCE_MARKS[source];
   return (
-    <span
-      role="img"
-      aria-label={name}
+    <img
+      src={src}
+      alt={name}
       title={name}
-      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold"
-      style={{ background: bg, color: fg }}
-    >
-      {letter}
-    </span>
+      width={20}
+      height={20}
+      draggable={false}
+      className="block h-5 w-5 shrink-0 rounded-md object-cover"
+    />
   );
 }

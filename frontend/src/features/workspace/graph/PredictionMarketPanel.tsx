@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, useRef } from "react";
 import { MagnifyingGlass, TrendDown, TrendUp, X } from "@phosphor-icons/react";
 import {
   fetchRecommendedMarkets,
@@ -18,6 +18,7 @@ const compact = new Intl.NumberFormat("en-US", {
 import { CompanyAlerts, LiveEventsList, useLiveAlerts } from "../alerts";
 import { GenerateButton } from "../markets";
 import { useWorkspace } from "../useWorkspace";
+import { onCommand, publishScreen } from "../../assistant/assistantBus";
 
 /** Recommendations shown (the list scrolls); matches the `limit` fetchRecommendedMarkets asks the backend for. */
 const RECOMMENDED_MAX = 10;
@@ -250,6 +251,53 @@ export function PredictionMarketPanel({ ticker }: { ticker: string | null }) {
   const loading = showingSearch ? searching : recsLoading;
   // Search results get the full list (the user asked for them); recommendations are capped so the live list fits.
   const items = showingSearch ? matches : recs.slice(0, RECOMMENDED_MAX);
+
+  // The voice assistant reads the visible list (numbered as on screen) and can search and pick from it.
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const toggleRef = useRef(toggle);
+  toggleRef.current = toggle;
+  const selectedRef = useRef(state.selectedMarketIds);
+  selectedRef.current = state.selectedMarketIds;
+  useEffect(() => {
+    publishScreen("markets_panel", {
+      showing: showingSearch ? `search results for "${submitted}"` : `recommended for ${ticker ?? "this company"}`,
+      loading,
+      sample_data: !showingSearch && recsAreSample,
+      visible_markets: items.slice(0, 12).map((m, i) => ({
+        number: i + 1,
+        title: m.title,
+        outcome: m.outcome ?? null,
+        venue: m.source,
+        yes_price_cents: m.yesPrice ?? null,
+        closes: m.closeTime,
+        selected: state.selectedMarketIds.includes(m.id),
+      })),
+    });
+  }, [items, loading, showingSearch, submitted, ticker, recsAreSample, state.selectedMarketIds]);
+  useEffect(() => () => publishScreen("markets_panel", undefined), []);
+  useEffect(() => {
+    const offSearch = onCommand("search_markets", (value) => {
+      if (!value) return "What should I search markets for?";
+      setQuery(value);
+      setSubmitted(value);
+    });
+    const offSelect = onCommand("select_market", (value) => {
+      const list = itemsRef.current;
+      if (!value || list.length === 0) return "There are no markets on screen to pick from.";
+      const n = Number.parseInt(value, 10);
+      const wanted = value.toLowerCase();
+      const market = Number.isFinite(n) && n >= 1 && n <= list.length
+        ? list[n - 1]
+        : list.find((m) => m.title.toLowerCase().includes(wanted) || (m.outcome ?? "").toLowerCase().includes(wanted));
+      if (!market) return `I couldn't find "${value}" in the list.`;
+      if (!selectedRef.current.includes(market.id)) toggleRef.current(market);
+    });
+    return () => {
+      offSearch();
+      offSelect();
+    };
+  }, []);
 
   return (
     <section

@@ -4,6 +4,7 @@ import { WorkspaceProvider } from "../features/workspace/WorkspaceProvider";
 import { TickerInput, GraphCanvas } from "../features/workspace/graph";
 import { PredictionMarketPanel } from "../features/workspace/graph/PredictionMarketPanel";
 import { useWorkspace } from "../features/workspace/useWorkspace";
+import { useWorkspaceAssistant } from "../features/assistant/useWorkspaceAssistant";
 import { ResizableAside } from "../features/workspace/shared/ResizableAside";
 import {
   WorkspaceTransition,
@@ -90,6 +91,7 @@ export function WorkspaceShell() {
   // the ticker prompt. The first key (page load, arriving from a project page)
   // is skipped so a fresh mount isn't reset twice.
   const { state, dispatch } = useWorkspace();
+  useWorkspaceAssistant(state, dispatch);
   const { key } = useLocation();
   const firstKey = useRef(key);
   useEffect(() => {

@@ -204,3 +204,12 @@ body {
 .recharts-surface:focus {
   outline: none;
 }
+
+/* Voice assistant: the soft pulse while it is thinking or speaking. */
+@keyframes assistant-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="assistant-pulse"] { animation: none !important; }
+}

@@ -2,6 +2,7 @@ import { Bell, TrendDown, TrendUp, X } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { onCommand, publishScreen } from "../../assistant/assistantBus";
 import type { AlertCompany, RecentAlert } from "../../../types/alert";
 import { SourceMark } from "../shared/SourceMark";
 import { useWorkspace } from "../useWorkspace";
@@ -167,6 +168,24 @@ export function AlertsFeed() {
   }
 
   const count = alerts.length;
+
+  // The voice assistant can open the bell, and reads the live alerts as part of the screen.
+  useEffect(() => onCommand("open_alerts", () => setOpen(true)), []);
+  useEffect(() => {
+    publishScreen("live_alerts", {
+      status,
+      count_last_hour: count,
+      latest: alerts.slice(0, 8).map((a) => ({
+        market: a.eventTitle ?? a.title,
+        direction: a.direction === "yes_up" ? "odds up" : "odds down",
+        summary: a.summary,
+        score: a.score,
+        companies: a.companies.slice(0, 5).map((c) => c.name ?? c.symbol),
+        at: a.createdAt,
+      })),
+    });
+    return () => publishScreen("live_alerts", undefined);
+  }, [alerts, status, count]);
 
   return (
     <>

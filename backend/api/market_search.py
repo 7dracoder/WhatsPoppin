@@ -17,6 +17,7 @@ from backend.api.deps import get_db_engine
 from backend.api.market_activity import only_traded
 from backend.enrichment.vectors import search_events
 from backend.llm.embeddings import EmbeddingError, embed_model
+from backend.observability import trace_run
 
 log = logging.getLogger(__name__)
 
@@ -51,13 +52,21 @@ async def search_markets(q: str = Query(min_length=2, max_length=300), limit: in
                          engine: AsyncEngine = Depends(get_db_engine), search_fn=Depends(get_search_fn)):
     """Open markets about `q`, most similar first. With `traded` (the default) only markets that
     traded on their venue in the last week, so every result has a chart."""
-    try:
-        hits = await search_fn(engine, q.strip(), limit * (TRADED_OVERSAMPLE if traded else 1), min_score)
-    except EmbeddingError as exc:
-        raise HTTPException(502, f"Market search failed: {exc}") from exc
-    rows = [{**markets[0], "score": round(score, 4)} for markets, score in hits]
-    if traded:
-        rows = await only_traded(rows)
     model = embed_model()
-    fields = MarketMatchOut.model_fields
-    return [MarketMatchOut(**{k: r.get(k) for k in fields if k != "model"}, model=model) for r in rows[:limit]]
+    with trace_run("markets.search", inputs={"q": q, "limit": limit, "min_score": min_score}, model=model) as run:
+        try:
+            with run.step("embeddings.search", kind="retrieval", model=model) as step:
+                hits = await search_fn(engine, q.strip(), limit * (TRADED_OVERSAMPLE if traded else 1), min_score)
+                step.output = [{"event": (m[0].get("event_title") or m[0].get("title")), "score": round(s, 4)}
+                               for m, s in hits[:10]]
+        except EmbeddingError as exc:
+            raise HTTPException(502, f"Market search failed: {exc}") from exc
+        rows = [{**markets[0], "score": round(score, 4)} for markets, score in hits]
+        if traded:
+            with run.step("venue.activity_filter", kind="tool") as step:
+                rows = await only_traded(rows)
+                step.output = {"kept": len(rows)}
+        fields = MarketMatchOut.model_fields
+        out = [MarketMatchOut(**{k: r.get(k) for k in fields if k != "model"}, model=model) for r in rows[:limit]]
+        run.output = {"results": len(out)}
+        return out

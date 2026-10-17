@@ -233,3 +233,5 @@ __marimo__/
 .DS_Store
 
 company_graph_dump.sql
+# Private project guide (local only, never pushed)
+PROJECT_GUIDE.md

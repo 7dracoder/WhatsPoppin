@@ -1,7 +1,8 @@
 import { ArrowLeft, ArrowSquareOut, ArrowsOutLineHorizontal, MagnifyingGlassMinus } from "@phosphor-icons/react";
 import { useContext, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { describeAge, fetchSeriesBundle, type MarketMeta, type SeriesBundle } from "../../../lib/api/series";
-import { alignLevels, computeRelationship, MIN_PAIRS, type RelationshipResult } from "../../../lib/chart/relationship";
+import { alignLevels, computeRelationship, describeLeadLag, MIN_PAIRS, type RelationshipResult } from "../../../lib/chart/relationship";
+import { publishScreen } from "../../assistant/assistantBus";
 import { brushDomain, pixelToTime, zoomAround, type TimeDomain } from "../../../lib/chart/zoom";
 import type { MarketCard, NormalizedSeries } from "../../../types/market";
 import { ThemeContext } from "../../theme/ThemeProvider";
@@ -355,6 +356,43 @@ export function OverlayChart({ ticker, marketIds, children, className }: Overlay
     markets[0] ??
     null;
   const relationship = relationshipMarket ? (relationships.get(relationshipMarket.id) ?? null) : null;
+
+  // What the chart shows, in numbers, for the voice assistant.
+  useEffect(() => {
+    const firstLast = (s: NormalizedSeries) => {
+      const pts = s.points;
+      if (pts.length === 0) return { data: "none in this window" };
+      const a = pts[0].rawValue;
+      const b = pts[pts.length - 1].rawValue;
+      return s.kind === "stock"
+        ? { start_usd: +a.toFixed(2), end_usd: +b.toFixed(2), change_pct: +(((b - a) / a) * 100).toFixed(2) }
+        : { start_odds_pct: +a.toFixed(1), end_odds_pct: +b.toFixed(1), change_points: +(b - a).toFixed(1) };
+    };
+    publishScreen("chart", {
+      status,
+      view,
+      range,
+      window: fullDomain ? [new Date(fullDomain[0]).toISOString(), new Date(fullDomain[1]).toISOString()] : null,
+      stock: stock ? { ticker: stock.label, ...firstLast(stock) } : null,
+      markets: markets.map((m) => {
+        const r = relationships.get(m.id)?.result;
+        return {
+          title: m.label,
+          ...firstLast(m),
+          correlation:
+            r && r.status === "ok"
+              ? {
+                  latest_r: r.latest ? +r.latest.r.toFixed(2) : null,
+                  lead_lag: r.leadLag ? describeLeadLag(r.leadLag) : null,
+                  odds_moved_share: +r.oddsActiveShare.toFixed(2),
+                  note: "SPY-adjusted stock returns vs changes in logit odds; correlation, not causation",
+                }
+              : "not enough overlapping data for a correlation",
+        };
+      }),
+    });
+  }, [status, view, range, fullDomain, stock, markets, relationships]);
+  useEffect(() => () => publishScreen("chart", undefined), []);
 
   // Horizontal drag is a brush: it selects a time span and zooms every panel to it.
   // It used to step the window a day per 120px instead. The two can't share a plain
