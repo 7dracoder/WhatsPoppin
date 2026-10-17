@@ -9,8 +9,8 @@ import httpx
 from dotenv import load_dotenv
 
 from backend.ingestion.common import db, runner
-from backend.ingestion.kalshi.kalshi import (REST_URL, MarketSession, discover_categories, discover_series,
-                                             load_private_key, top_by_volume)
+from backend.ingestion.kalshi.kalshi import (REST_URL, MarketSession, PollingSession, discover_categories,
+                                             discover_series, load_private_key, top_by_volume)
 
 log = logging.getLogger("ingestion.kalshi")
 SOURCE = "kalshi"
@@ -24,9 +24,9 @@ async def main() -> None:
     series = [s.strip() for s in os.environ.get("KALSHI_SERIES", "").split(",") if s.strip()]
     categories = [c.strip() for c in os.environ.get("KALSHI_CATEGORIES", "").split(",") if c.strip()]
     max_markets = int(os.environ.get("KALSHI_MAX_MARKETS") or 1000)
-    if not (database_url and key_id and (series or categories)):
-        sys.exit("Set DATABASE_URL, KALSHI_API_KEY_ID and KALSHI_CATEGORIES or KALSHI_SERIES in .env")
-    private_key = load_private_key(key_path)
+    if not (database_url and (series or categories)):
+        sys.exit("Set DATABASE_URL and KALSHI_CATEGORIES or KALSHI_SERIES in .env")
+    private_key = load_private_key(key_path) if key_id else None  # no key: poll the public REST API
     http = httpx.AsyncClient(base_url=REST_URL, timeout=15)
     first_discovery = True
 
@@ -50,6 +50,8 @@ async def main() -> None:
         return followed
 
     def make_session(engine, writer):
+        if private_key is None:
+            return PollingSession(http, lambda: discover(engine), writer.add_price, writer.add_trade)
         return MarketSession(key_id, private_key, lambda: discover(engine), writer.add_price, writer.add_trade)
 
     await runner.run_worker(log, database_url, make_session, cleanup=http.aclose)

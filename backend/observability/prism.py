@@ -141,7 +141,8 @@ def _text(value: Any) -> str:
 
 
 def _to_trace(record: dict, project_id: str) -> dict:
-    """A run as one PRISM trace. A failed run carries no output, which PRISM counts as an error."""
+    """A run as one PRISM trace. A run that crashed carries no output, which PRISM counts as an error;
+    one that answered but failed a check keeps its answer, with the error in its metadata."""
     inputs, output = record["input"], record["output"]
     message = inputs.get("message") if isinstance(inputs, dict) else None
     reply = output.get("reply") if isinstance(output, dict) else None
@@ -151,29 +152,47 @@ def _to_trace(record: dict, project_id: str) -> dict:
         "project_id": project_id,
         "trace_id": record["run_id"],
         "session_id": record["run_id"],
-        "agent_id": f"{record['service']}.{record['name']}",
-        "agent_name": record["name"],
+        "agent_id": record["attributes"].get("agent_id") or f"{record['service']}.{record['name']}",
+        "agent_name": record["attributes"].get("agent_name") or record["name"],
         "model": model,
         "input_messages": [{"role": "user", "content": _text(message or inputs)}],
-        "output_message": "" if record["status"] == "error" else _text(reply or output),
+        "output_message": _text(reply or output),
         "latency_ms": int(record["duration_ms"]),
         "metadata": {"service": record["service"], "status": record["status"], "error": record["error"],
                      **record["attributes"]},
     }
 
 
+def _end(started_at: str, duration_ms: float) -> str:
+    start = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
+    return datetime.fromtimestamp(start.timestamp() + duration_ms / 1000, timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def _to_spans(record: dict, project_id: str) -> dict:
-    """The run's steps as spans; PRISM's span types are llm, tool and agent, so retrieval is a tool."""
-    spans = []
+    """The run as a root agent span with its steps nested under it. PRISM shows the root span's input
+    and output as the trace's conversation. Its span types are llm, tool and agent, so retrieval is a tool."""
+    trace = _to_trace(record, project_id)
+    root_id = record["run_id"][:16]
+    spans = [{
+        "span_id": root_id,
+        "name": record["name"],
+        "span_type": "agent",
+        "start_time": record["started_at"],
+        "end_time": _end(record["started_at"], record["duration_ms"]),
+        "duration_ms": record["duration_ms"],
+        "status": record["status"],
+        "error_message": f"{record['error']['type']}: {record['error']['message']}" if record["error"] else None,
+        "input_text": trace["input_messages"][0]["content"],
+        "output_text": trace["output_message"],
+    }]
     for s in record["steps"]:
-        start = datetime.fromisoformat(s["started_at"].replace("Z", "+00:00"))
-        end = start.timestamp() + s["duration_ms"] / 1000
         spans.append({
             "span_id": s["id"],
+            "parent_span_id": root_id,
             "name": s["name"],
             "span_type": "llm" if s["kind"] == "llm" else "tool",
             "start_time": s["started_at"],
-            "end_time": datetime.fromtimestamp(end, timezone.utc).isoformat().replace("+00:00", "Z"),
+            "end_time": _end(s["started_at"], s["duration_ms"]),
             "duration_ms": s["duration_ms"],
             "status": s["status"],
             "error_message": s["error"]["message"] if s["error"] else None,

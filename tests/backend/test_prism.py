@@ -50,8 +50,11 @@ def test_run_is_sent_as_trace_then_spans(sent):
 
     assert spans["url"] == "https://prism.blockconvey.com/api/spans/ingest"
     assert spans["json"]["trace_id"] == run.id
-    assert [(s["name"], s["span_type"]) for s in spans["json"]["spans"]] == [
-        ("context.snapshot", "tool"), ("llm.complete_structured", "llm")]
+    root, *children = spans["json"]["spans"]
+    assert (root["name"], root["span_type"]) == ("assistant.turn", "agent")
+    assert root["input_text"] == "show me nvidia" and root["output_text"] == "Opening Nvidia."
+    assert [(s["name"], s["span_type"], s["parent_span_id"]) for s in children] == [
+        ("context.snapshot", "tool", root["span_id"]), ("llm.complete_structured", "llm", root["span_id"])]
 
 
 def test_failed_run_has_no_output_and_an_errored_span(sent):
@@ -64,7 +67,8 @@ def test_failed_run_has_no_output_and_an_errored_span(sent):
     assert trace["json"]["output_message"] == ""
     assert trace["json"]["model"] == "voyage/voyage-finance-2"
     assert trace["json"]["metadata"]["error"]["type"] == "ValueError"
-    [span] = spans["json"]["spans"]
+    root, span = spans["json"]["spans"]
+    assert root["status"] == "error" and root["error_message"] == "ValueError: gateway down"
     assert span["status"] == "error" and span["error_message"] == "gateway down"
 
 

@@ -361,7 +361,7 @@ uv run python -m backend.alert_impact           # alert → affected companies
 | `ALPACA_API_KEY_ID` / `ALPACA_API_SECRET_KEY` | Stock prices | [alpaca.markets](https://app.alpaca.markets) (free) | Placeholder stock line |
 | `NEWSAPI_KEY` | News evidence + graph highlights | [newsapi.org](https://newsapi.org) (free) | Placeholder news |
 | `X_BEARER_TOKEN` | X posts as evidence + highlights | [developer.x.com](https://developer.x.com) | Placeholder posts |
-| `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` | Kalshi live stream | kalshi.com → API keys | Kalshi charts still work (public) |
+| `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` | Kalshi live stream | kalshi.com → API keys | The Kalshi worker polls the public REST API every 10 s instead |
 | `POLYMARKET_US_KEY_ID` / `_SECRET_KEY` | Polymarket US stream | polymarket.us/developer | Global Polymarket needs no key |
 | `TYPESAFE_API_KEY` | Optional: native Jev model for classification | typesafe.ai | Classifier runs on Nicrron |
 | `NICRRON_EMBED_MODEL` | Optional: embedding model | — | `voyage/voyage-finance-2` |

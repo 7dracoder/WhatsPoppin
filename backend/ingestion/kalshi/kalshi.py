@@ -1,4 +1,5 @@
-"""Kalshi client: request signing, REST market discovery, WebSocket ticker + trade stream."""
+"""Kalshi client: request signing, REST market discovery, WebSocket ticker + trade stream, and
+a keyless REST poller that writes the same rows when no API key is set."""
 
 import asyncio
 import base64
@@ -23,6 +24,8 @@ WS_PATH = "/trade-api/ws/v2"
 DISCOVERY_INTERVAL_S = 5 * 60
 PAGE_PAUSE_S = 0.25  # between REST pages; Kalshi answers 429 to fast paging
 RETRY_429 = 5  # 429 retries per request, backing off 1, 2, 4... s
+POLL_INTERVAL_S = 10  # keyless mode: seconds between REST polls
+TICKERS_PER_REQUEST = 100  # keyless mode: markets per GET /markets?tickers=...
 
 
 # --- Signing ------------------------------------------------------------------
@@ -345,3 +348,94 @@ class MarketSession:
             self.sids[msg["channel"]] = msg.get("sid")
         elif kind == "error":
             log.error("Kalshi error: %s", msg)
+
+
+# --- Keyless REST polling -----------------------------------------------------
+def parse_rest_market(m: dict, ts: datetime, snapshot: bool) -> tuple | None:
+    """GET /markets item -> market_prices row, or None if it has no quote."""
+    try:
+        return (
+            "kalshi",
+            m["ticker"],
+            ts,
+            Decimal(m["last_price_dollars"]),
+            Decimal(m["yes_bid_dollars"]),
+            Decimal(m["yes_ask_dollars"]),
+            _dec(m.get("yes_bid_size_fp")),
+            _dec(m.get("yes_ask_size_fp")),
+            _dec(m.get("volume_fp")),
+            _dec(m.get("open_interest_fp")),
+            snapshot,
+        )
+    except (KeyError, TypeError, ValueError, InvalidOperation):
+        return None
+
+
+def parse_rest_trade(t: dict) -> tuple | None:
+    """GET /markets/trades item -> market_trades row; same fields as the stream, other names."""
+    created = _parse_time(t.get("created_time"))
+    if created is None:
+        return None
+    return parse_trade({**t, "market_ticker": t.get("ticker"), "ts_ms": created.timestamp() * 1000})
+
+
+class PollingSession:
+    """MarketSession without an API key: the public REST API polled every POLL_INTERVAL_S.
+
+    Prices come from GET /markets?tickers=... and are written only when the quote changed (the
+    first poll is the snapshot), like the ticker channel. Trades come from GET /markets/trades,
+    which lists every market's trades, filtered to the followed ones.
+    """
+
+    def __init__(self, client: httpx.AsyncClient, discover, on_price, on_trade):
+        self.client = client
+        self.discover = discover
+        self.on_price = on_price
+        self.on_trade = on_trade
+        self.ws = None  # the runner resets its backoff once this is set: after the first poll
+        self.last_quote: dict[str, tuple] = {}
+        self.seen_trades: set[str] = set()
+
+    async def run(self) -> None:
+        followed = await self.discover()
+        discovered_at = since = time.time()
+        log.info("Polling the public REST API every %ds (no KALSHI_API_KEY_ID set)", POLL_INTERVAL_S)
+        while True:
+            if time.time() - discovered_at > DISCOVERY_INTERVAL_S:
+                try:
+                    followed = await self.discover()
+                except (httpx.HTTPError, ValueError, KeyError) as e:
+                    log.warning("Discovery failed, keeping current markets: %s", e)
+                discovered_at = time.time()
+            started = time.time()
+            await self._poll_prices(sorted(followed))
+            since = await self._poll_trades(followed, since)
+            self.ws = self.client
+            await asyncio.sleep(max(0.0, POLL_INTERVAL_S - (time.time() - started)))
+
+    async def _poll_prices(self, tickers: list[str]) -> None:
+        now = datetime.now(timezone.utc)
+        for i in range(0, len(tickers), TICKERS_PER_REQUEST):
+            chunk = tickers[i:i + TICKERS_PER_REQUEST]
+            data = await get_json(self.client, "/markets", {"tickers": ",".join(chunk), "limit": len(chunk)})
+            for m in data.get("markets") or []:
+                row = parse_rest_market(m, now, snapshot=m.get("ticker") not in self.last_quote)
+                if row is None or self.last_quote.get(row[1]) == row[3:-1]:
+                    continue
+                self.last_quote[row[1]] = row[3:-1]
+                self.on_price(row)
+
+    async def _poll_trades(self, followed: set[str], since: float) -> float:
+        """Trades since `since` (unix s, inclusive, so re-seen ids are skipped); returns the next `since`."""
+        polled_at = time.time()
+        trades = await _paginate(self.client, "/markets/trades", "trades", {"min_ts": int(since), "limit": 1000})
+        ids = set()
+        for t in trades:
+            ids.add(t.get("trade_id"))
+            if t.get("ticker") not in followed or t.get("trade_id") in self.seen_trades:
+                continue
+            row = parse_rest_trade(t)
+            if row is not None:
+                self.on_trade(row)
+        self.seen_trades = ids
+        return polled_at - 1
